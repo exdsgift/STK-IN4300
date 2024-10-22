@@ -1,0 +1,572 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.15)  18 SEP 2024 16:18
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**"/Users/gabrieledurante/Documents/UiO/STK-IN4300 - Statistical Learning/assigment 1/report/report.tex"
+(/Users/gabrieledurante/Documents/UiO/STK-IN4300 - Statistical Learning/assigment 1/report/report.tex
+LaTeX2e <2024-06-01> patch level 2
+L3 programming layer <2024-08-30>
+(/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2024/02/08 v1.4n Standard LaTeX document class
+(/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2024/02/08 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count194
+\c@section=\count195
+\c@subsection=\count196
+\c@subsubsection=\count197
+\c@paragraph=\count198
+\c@subparagraph=\count199
+\c@figure=\count266
+\c@table=\count267
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen141
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2024/02/08 v1.3d Input encoding file
+\inpenc@prehook=\toks17
+\inpenc@posthook=\toks18
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks19
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2024/05/23 v1.4g Standard LaTeX Graphics (DPC,SPQR)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 106.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2024/04/13 v1.2c Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen142
+\Gin@req@width=\dimen143
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2024/05/23 v2.17q AMS math features
+\@mathmargin=\skip51
+
+For additional information on amsmath, use the `?' option.
+(/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2021/08/26 v2.01 AMS text
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks20
+\ex@=\dimen144
+)) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen145
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count268
+LaTeX Info: Redefining \frac on input line 233.
+\uproot@=\count269
+\leftroot@=\count270
+LaTeX Info: Redefining \overline on input line 398.
+LaTeX Info: Redefining \colon on input line 409.
+\classnum@=\count271
+\DOTSCASE@=\count272
+LaTeX Info: Redefining \ldots on input line 495.
+LaTeX Info: Redefining \dots on input line 498.
+LaTeX Info: Redefining \cdots on input line 619.
+\Mathstrutbox@=\box52
+\strutbox@=\box53
+LaTeX Info: Redefining \big on input line 721.
+LaTeX Info: Redefining \Big on input line 722.
+LaTeX Info: Redefining \bigg on input line 723.
+LaTeX Info: Redefining \Bigg on input line 724.
+\big@size=\dimen146
+LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
+\macc@depth=\count273
+LaTeX Info: Redefining \bmod on input line 904.
+LaTeX Info: Redefining \pmod on input line 909.
+LaTeX Info: Redefining \smash on input line 939.
+LaTeX Info: Redefining \relbar on input line 969.
+LaTeX Info: Redefining \Relbar on input line 970.
+\c@MaxMatrixCols=\count274
+\dotsspace@=\muskip17
+\c@parentequation=\count275
+\dspbrk@lvl=\count276
+\tag@help=\toks21
+\row@=\count277
+\column@=\count278
+\maxfields@=\count279
+\andhelp@=\toks22
+\eqnshift@=\dimen147
+\alignsep@=\dimen148
+\tagshift@=\dimen149
+\tagwidth@=\dimen150
+\totwidth@=\dimen151
+\lineht@=\dimen152
+\@envbody=\toks23
+\multlinegap=\skip52
+\multlinetaggap=\skip53
+\mathdisplay@stack=\toks24
+LaTeX Info: Redefining \[ on input line 2953.
+LaTeX Info: Redefining \] on input line 2954.
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2022/02/03 v1.0f TeX engine tests
+))
+\Gm@cnth=\count280
+\Gm@cntv=\count281
+\c@Gm@tempcnt=\count282
+\Gm@bindingoffset=\dimen153
+\Gm@wd@mp=\dimen154
+\Gm@odd@mp=\dimen155
+\Gm@even@mp=\dimen156
+\Gm@layoutwidth=\dimen157
+\Gm@layoutheight=\dimen158
+\Gm@layouthoffset=\dimen159
+\Gm@layoutvoffset=\dimen160
+\Gm@dimlist=\toks25
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/tools/array.sty
+Package: array 2024/06/14 v2.6d Tabular extension package (FMi)
+\col@sep=\dimen161
+\ar@mcellbox=\box54
+\extrarowheight=\dimen162
+\NC@list=\toks26
+\extratabsurround=\skip54
+\backup@length=\skip55
+\ar@cellbox=\box55
+)
+\TX@col@width=\dimen163
+\TX@old@table=\dimen164
+\TX@old@col=\dimen165
+\TX@target=\dimen166
+\TX@delta=\dimen167
+\TX@cols=\count283
+\TX@ftn=\toks27
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2024-04-26 v4.20 Multi-page Table package (DPC)
+\LTleft=\skip56
+\LTright=\skip57
+\LTpre=\skip58
+\LTpost=\skip59
+\LTchunksize=\count284
+\LTcapwidth=\dimen168
+\LT@head=\box56
+\LT@firsthead=\box57
+\LT@foot=\box58
+\LT@lastfoot=\box59
+\LT@gbox=\box60
+\LT@cols=\count285
+\LT@rows=\count286
+\c@LT@tables=\count287
+\c@LT@chunks=\count288
+\LT@p@ftn=\toks28
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+Package: adjustbox 2022/10/17 v1.3a Adjusting TeX boxes (trim, clip, ...)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/xkeyval/xkeyval.tex (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks29
+\XKV@tempa@toks=\toks30
+)
+\XKV@depth=\count289
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+)) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/adjustbox/adjcalc.sty
+Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back-ends (calc, etex, pgfmath)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/adjustbox/trimclip.sty
+Package: trimclip 2020/08/19 v1.2 Trim and clip general TeX material
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/collectbox/collectbox.sty
+Package: collectbox 2022/10/17 v0.4c Collect macro arguments as boxes
+\collectedbox=\box61
+)
+\tc@llx=\dimen169
+\tc@lly=\dimen170
+\tc@urx=\dimen171
+\tc@ury=\dimen172
+Package trimclip Info: Using driver 'tc-pdftex.def'.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/adjustbox/tc-pdftex.def
+File: tc-pdftex.def 2019/01/04 v2.2 Clipping driver for pdftex
+))
+\adjbox@Width=\dimen173
+\adjbox@Height=\dimen174
+\adjbox@Depth=\dimen175
+\adjbox@Totalheight=\dimen176
+\adjbox@pwidth=\dimen177
+\adjbox@pheight=\dimen178
+\adjbox@pdepth=\dimen179
+\adjbox@ptotalheight=\dimen180
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count290
+\float@exts=\toks31
+\float@box=\box62
+\@float@everytoks=\toks32
+\@floatcapt=\box63
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2024-01-22 v1.5x LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks33
+\verbatim@line=\toks34
+\verbatim@in@stream=\read2
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2024-07-10 v7.01j Hypertext links for LaTeX
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count291
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count292
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
+)
+\@linkdim=\dimen181
+\Hy@linkcounter=\count293
+\Hy@pagecounter=\count294
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2024-07-10 v7.01j Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count295
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2024-07-10 v7.01j Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Hyper figures OFF on input line 4157.
+Package hyperref Info: Link nesting OFF on input line 4162.
+Package hyperref Info: Hyper index ON on input line 4165.
+Package hyperref Info: Plain pages OFF on input line 4172.
+Package hyperref Info: Backreferencing OFF on input line 4177.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4424.
+\c@Hy@tempcnt=\count296
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip18
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4763.
+\XeTeXLinkMargin=\dimen182
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
+))
+\Fld@menulength=\count297
+\Field@Width=\dimen183
+\Fld@charsize=\dimen184
+Package hyperref Info: Hyper figures OFF on input line 6042.
+Package hyperref Info: Link nesting OFF on input line 6047.
+Package hyperref Info: Hyper index ON on input line 6050.
+Package hyperref Info: backreferencing OFF on input line 6057.
+Package hyperref Info: Link coloring OFF on input line 6062.
+Package hyperref Info: Link coloring with OCG OFF on input line 6067.
+Package hyperref Info: PDF/A mode OFF on input line 6072.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
+)
+\Hy@abspage=\count298
+\c@Item=\count299
+\c@Hfootnote=\count300
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2024-07-10 v7.01j Hyperref driver for pdfTeX
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
+with kernel methods
+)
+\Fld@listcount=\count301
+\c@bookmark@seq@number=\count302
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
+)
+\Hy@SectionHShift=\skip60
+) (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count303
+\l__pdf_internal_box=\box64
+) (./report.aux)
+\openout1 = `report.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (/Users/gabrieledurante/Library/TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
+))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(92.14519pt, 430.00462pt, 92.14519pt)
+* v-part:(T,H,B)=(95.39737pt, 556.47656pt, 143.09605pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=430.00462pt
+* \textheight=556.47656pt
+* \oddsidemargin=19.8752pt
+* \evensidemargin=19.8752pt
+* \topmargin=-13.87262pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+Package hyperref Info: Link coloring OFF on input line 22.
+(./report.out) (./report.out)
+\@outlinefile=\write3
+\openout3 = `report.out'.
+
+
+
+[1
+
+{/Users/gabrieledurante/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+<images/summary_tab2.png, id=79, 890.32625pt x 508.90125pt>
+File: images/summary_tab2.png Graphic file (type png)
+<use images/summary_tab2.png>
+Package pdftex.def Info: images/summary_tab2.png  used on input line 35.
+(pdftex.def)             Requested size: 430.00462pt x 245.78404pt.
+
+
+[2 <./images/summary_tab2.png>]
+<images/barplottemp.pdf, id=98, 679.53876pt x 374.39874pt>
+File: images/barplottemp.pdf Graphic file (type pdf)
+<use images/barplottemp.pdf>
+Package pdftex.def Info: images/barplottemp.pdf  used on input line 53.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/barplotRH.pdf, id=99, 679.53876pt x 374.39874pt>
+File: images/barplotRH.pdf Graphic file (type pdf)
+<use images/barplotRH.pdf>
+Package pdftex.def Info: images/barplotRH.pdf  used on input line 59.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/pieplottemp.pdf, id=100, 679.53876pt x 374.39874pt>
+File: images/pieplottemp.pdf Graphic file (type pdf)
+<use images/pieplottemp.pdf>
+Package pdftex.def Info: images/pieplottemp.pdf  used on input line 65.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[3 <./images/barplottemp.pdf>]
+<images/pieplotRH.pdf, id=120, 679.53876pt x 374.39874pt>
+File: images/pieplotRH.pdf Graphic file (type pdf)
+<use images/pieplotRH.pdf>
+Package pdftex.def Info: images/pieplotRH.pdf  used on input line 71.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/PT08.S3Boxplot.pdf, id=121, 679.53876pt x 374.39874pt>
+File: images/PT08.S3Boxplot.pdf Graphic file (type pdf)
+<use images/PT08.S3Boxplot.pdf>
+Package pdftex.def Info: images/PT08.S3Boxplot.pdf  used on input line 77.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[4 <./images/barplotRH.pdf> <./images/pieplottemp.pdf>]
+<images/TempvsPT08.pdf, id=138, 679.53876pt x 374.39874pt>
+File: images/TempvsPT08.pdf Graphic file (type pdf)
+<use images/TempvsPT08.pdf>
+Package pdftex.def Info: images/TempvsPT08.pdf  used on input line 83.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/TempvsNOcGT.pdf, id=139, 679.53876pt x 374.39874pt>
+File: images/TempvsNOcGT.pdf Graphic file (type pdf)
+<use images/TempvsNOcGT.pdf>
+Package pdftex.def Info: images/TempvsNOcGT.pdf  used on input line 89.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[5 <./images/pieplotRH.pdf> <./images/PT08.S3Boxplot.pdf>]
+<images/HistInappropRange.pdf, id=156, 679.53876pt x 374.39874pt>
+File: images/HistInappropRange.pdf Graphic file (type pdf)
+<use images/HistInappropRange.pdf>
+Package pdftex.def Info: images/HistInappropRange.pdf  used on input line 95.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/PT08.s3LArgeBins.pdf, id=157, 679.53876pt x 374.39874pt>
+File: images/PT08.s3LArgeBins.pdf Graphic file (type pdf)
+<use images/PT08.s3LArgeBins.pdf>
+Package pdftex.def Info: images/PT08.s3LArgeBins.pdf  used on input line 101.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[6 <./images/TempvsPT08.pdf> <./images/TempvsNOcGT.pdf>]
+<images/piechartRHgood.pdf, id=181, 679.53876pt x 374.39874pt>
+File: images/piechartRHgood.pdf Graphic file (type pdf)
+<use images/piechartRHgood.pdf>
+Package pdftex.def Info: images/piechartRHgood.pdf  used on input line 113.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[7 <./images/HistInappropRange.pdf> <./images/PT08.s3LArgeBins.pdf>]
+<images/1_r.pdf, id=199, 679.53876pt x 374.39874pt>
+File: images/1_r.pdf Graphic file (type pdf)
+<use images/1_r.pdf>
+Package pdftex.def Info: images/1_r.pdf  used on input line 119.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/2_r.pdf, id=200, 679.53876pt x 374.39874pt>
+File: images/2_r.pdf Graphic file (type pdf)
+<use images/2_r.pdf>
+Package pdftex.def Info: images/2_r.pdf  used on input line 125.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[8 <./images/piechartRHgood.pdf>]
+<images/3_r.pdf, id=217, 679.53876pt x 374.39874pt>
+File: images/3_r.pdf Graphic file (type pdf)
+<use images/3_r.pdf>
+Package pdftex.def Info: images/3_r.pdf  used on input line 131.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+<images/4_r.pdf, id=218, 679.53876pt x 374.39874pt>
+File: images/4_r.pdf Graphic file (type pdf)
+<use images/4_r.pdf>
+Package pdftex.def Info: images/4_r.pdf  used on input line 137.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[9 <./images/1_r.pdf> <./images/2_r.pdf>]
+<images/5_r.pdf, id=235, 679.53876pt x 374.39874pt>
+File: images/5_r.pdf Graphic file (type pdf)
+<use images/5_r.pdf>
+Package pdftex.def Info: images/5_r.pdf  used on input line 143.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[10 <./images/3_r.pdf> <./images/4_r.pdf>]
+
+[11 <./images/5_r.pdf>]
+<images/Screenshot 2024-09-17 alle 18.47.02.png, id=262, 896.34875pt x 551.05875pt>
+File: images/Screenshot 2024-09-17 alle 18.47.02.png Graphic file (type png)
+<use images/Screenshot 2024-09-17 alle 18.47.02.png>
+Package pdftex.def Info: images/Screenshot 2024-09-17 alle 18.47.02.png  used on input line 154.
+(pdftex.def)             Requested size: 430.00462pt x 264.35384pt.
+<images/linear_model.pdf, id=264, 679.53876pt x 374.39874pt>
+File: images/linear_model.pdf Graphic file (type pdf)
+<use images/linear_model.pdf>
+Package pdftex.def Info: images/linear_model.pdf  used on input line 163.
+(pdftex.def)             Requested size: 430.00462pt x 236.91219pt.
+
+
+[12 <./images/Screenshot 2024-09-17 alle 18.47.02.png>]
+<images/stepwise.png, id=272, 896.34875pt x 863.225pt>
+File: images/stepwise.png Graphic file (type png)
+<use images/stepwise.png>
+Package pdftex.def Info: images/stepwise.png  used on input line 171.
+(pdftex.def)             Requested size: 430.00462pt x 414.1062pt.
+
+
+[13 <./images/linear_model.pdf>]
+<images/cv.png, id=286, 897.3525pt x 244.915pt>
+File: images/cv.png Graphic file (type png)
+<use images/cv.png>
+Package pdftex.def Info: images/cv.png  used on input line 178.
+(pdftex.def)             Requested size: 430.00462pt x 117.35979pt.
+
+
+[14 <./images/stepwise.png>]
+
+[15 <./images/cv.png>]
+<images/ridge.png, id=303, 900.36375pt x 84.315pt>
+File: images/ridge.png Graphic file (type png)
+<use images/ridge.png>
+Package pdftex.def Info: images/ridge.png  used on input line 197.
+(pdftex.def)             Requested size: 430.00462pt x 40.26874pt.
+<images/lasso.png, id=304, 896.34875pt x 89.33376pt>
+File: images/lasso.png Graphic file (type png)
+<use images/lasso.png>
+Package pdftex.def Info: images/lasso.png  used on input line 205.
+(pdftex.def)             Requested size: 430.00462pt x 42.85516pt.
+
+
+[16 <./images/ridge.png> <./images/lasso.png>]
+
+[17] (./report.aux)
+ ***********
+LaTeX2e <2024-06-01> patch level 2
+L3 programming layer <2024-08-30>
+ ***********
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: 5A8347C693912740E2D98C204679B2AA;2058.
+ ) 
+Here is how much of TeX's memory you used:
+ 10972 strings out of 475539
+ 176231 string characters out of 5776665
+ 571653 words of memory out of 5000000
+ 33420 multiletter control sequences out of 15000+600000
+ 566070 words of font info for 64 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 75i,7n,79p,710b,466s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib7.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></Users/gabrieledurante/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on report.pdf (17 pages, 1825491 bytes).
+PDF statistics:
+ 401 PDF objects out of 1000 (max. 8388607)
+ 304 compressed objects within 4 object streams
+ 54 named destinations out of 1000 (max. 500000)
+ 239 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,0 +1,381 @@
+---
+title: "Regression and Classification"
+author: "Gabriele Durante"
+date: "2024-10-21"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,             # Suppress warnings in the document
+  message = FALSE,             # Suppress messages in the document
+  fig.align = "center",        # Center align figures
+  fig.width = 6,             # Set default width of figures to fit two-column layout
+  fig.height = 4,              # Set default height of figures
+  fig.pos = "H",               # Force figure placement exactly where they are called
+  cache = TRUE                 # Enable caching
+)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, echo=FALSE, results='hide'}
+data <- read.csv("/Users/gabrieledurante/Documents/UiO/STK-IN4300 - Statistical Learning/assignment 2/qsar_aquatic_toxicity.csv",sep=";", header = FALSE)
+colnames(data) <- c("TPSA", "SAacc", "H050", "MLOGP", "RDCHI", "GATS1p", "nN", "C040", "LC50")
+head(data)
+dim(data)
+summary(data)
+str(data)
+colSums(is.na(data))
+```
+
+# Problem 1: regression
+## (A)
+
+```{r Splitting, echo=FALSE}
+# build the dataset for the training
+set.seed(2024)
+index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))
+trainData <- data[index, ]
+testData <- data[-index, ]
+
+# y_train <- trainData$LC50
+# X_train <- trainData[, !names(trainData) %in% c("LC50")]
+# y_test <- testData$LC50
+# X_test <- testData[, !names(testData) %in% c("LC50")]
+
+# data.train <- as.data.frame(cbind(y_train, X_train))
+# colnames(data.train)[1] <- 'y'
+```
+
+
+```{r Linear Model}
+set.seed(2024)
+### Modeling Count Variables Directly as Linear Effects
+model1 <- lm(LC50 ~., data = trainData)
+
+pred_model1_train <- predict(model1, newdata = trainData)
+pred_model1_test <- predict(model1, newdata = testData)
+
+error_train <- mean((pred_model1_train - trainData$LC50)^2)
+error_test <- mean((pred_model1_test - testData$LC50)^2)
+
+cat("Training Error (Linear):", error_train, "\n")
+cat("Test Error (Linear):", error_test, "\n")
+
+summary(model1)
+```
+
+````{r Dummy Linear model}
+### Dummy Encoding for Count Variables
+train_dummy <- trainData
+test_dummy <- testData
+
+# dummy encoding
+train_dummy$nN <- ifelse(train_dummy$nN > 0, 1, 0)
+test_dummy$nN <- ifelse(test_dummy$nN > 0, 1, 0)
+test_dummy$C040 <- ifelse(test_dummy$C040 > 0, 1, 0)
+train_dummy$C040 <- ifelse(train_dummy$C040 > 0, 1, 0)
+test_dummy$H050 <- ifelse(test_dummy$H050 > 0, 1, 0)
+train_dummy$H050 <- ifelse(train_dummy$H050 > 0, 1, 0)
+
+model2 <- lm(train_dummy$LC50 ~ ., data = train_dummy)
+
+pred_model2_train <- predict(model2, newdata = train_dummy)
+pred_model2_test <- predict(model2, newdata = test_dummy)
+
+error_train_dummy <- mean((pred_model2_train - train_dummy$LC50)^2)
+error_test_dummy <- mean((pred_model2_test - test_dummy$LC50)^2)
+
+cat("Training Error (Dummy):", error_train_dummy, "\n")
+cat("Test Error (Dummy):", error_test_dummy, "\n")
+
+summary(model2)
+
+````
+## (B)
+````{r 200 times}
+library(ggplot2)
+
+perform_analysis <- function(data) {
+  index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))
+  trainData <- data[index, ]
+  testData <- data[-index, ]
+
+  # model 1
+  model1 <- lm(LC50 ~., data = trainData)
+  pred_model1_train_200 <- predict(model1, newdata = trainData)
+  pred_model1_test_200 <- predict(model1, newdata = testData)
+  error_train_200_lm <- mean((pred_model1_train_200 - trainData$LC50)^2)
+  error_test_200_lm <- mean((pred_model1_test_200 - testData$LC50)^2)
+
+  # model 2
+  train_dummy <- trainData
+  test_dummy <- testData
+  
+  # dummy encoding
+  train_dummy$nN <- ifelse(train_dummy$nN > 0, 1, 0)
+  test_dummy$nN <- ifelse(test_dummy$nN > 0, 1, 0)
+  test_dummy$C040 <- ifelse(test_dummy$C040 > 0, 1, 0)
+  train_dummy$C040 <- ifelse(train_dummy$C040 > 0, 1, 0)
+  test_dummy$H050 <- ifelse(test_dummy$H050 > 0, 1, 0)
+  train_dummy$H050 <- ifelse(train_dummy$H050 > 0, 1, 0)
+  
+  model2 <- lm(train_dummy$LC50 ~ ., data = train_dummy)
+  
+  pred_model2_train <- predict(model2, newdata = train_dummy)
+  pred_model2_test <- predict(model2, newdata = test_dummy)
+  
+  error_train_200_dummy <- mean((pred_model2_train - train_dummy$LC50)^2)
+  error_test_200_dummy <- mean((pred_model2_test - test_dummy$LC50)^2)
+
+  return(c(error_test_200_lm, error_test_200_dummy))
+}
+````
+
+````{r}
+num_repeats <- 200
+results <- replicate(num_repeats, perform_analysis(data))
+
+avg_errors <- colMeans(results)
+
+results_df <- data.frame(
+  Error = c(results[1, ], results[2, ]),
+  Model = rep(c("Linear Effects", "Dummy Encoding"), each = num_repeats)
+)
+
+# Plot
+ggplot(results_df, aes(x = Error, fill = Model)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Empirical Distribution of Test Errors",
+       x = "Test Error (MSE)",
+       y = "Density") +
+  theme_minimal()
+
+cat("Average Test Error (Linear):", avg_errors[1], "\n")
+cat("Average Test Error (Dummy):", avg_errors[2], "\n")
+````
+## (C)
+````{r Backward Elimination}
+library(MASS)
+library(leaps)
+
+# Backward Elimination
+full_model <- lm(LC50 ~ ., data = trainData)
+backward_aic <- stepAIC(full_model, direction = "backward", k = 2, trace = FALSE)
+summary(backward_aic)
+backward_bic <- stepAIC(full_model, direction = "backward", k = log(nrow(trainData)), trace = FALSE)
+summary(backward_bic)
+````
+```{r Forward Selection}
+# Forward Selection
+null_model <- lm(LC50 ~ 1, data = trainData)
+forward_aic <- stepAIC(null_model, direction = "forward", scope = formula(full_model), k = 2, trace = FALSE)
+summary(forward_aic)
+forward_bic <- stepAIC(null_model, direction = "forward", scope = formula(full_model), k = log(nrow(trainData)), trace = FALSE)
+summary(forward_bic)
+```
+
+````{r Compare Models}
+# Compare Models
+cat("Backward Elimination (AIC) Model:\n")
+print(backward_aic$call)
+cat("\nBackward Elimination (BIC) Model:\n")
+print(backward_bic$call)
+cat("\nForward Selection (AIC) Model:\n")
+print(forward_aic$call)
+cat("\nForward Selection (BIC) Model:\n")
+print(forward_bic$call)
+
+# Model Comparisons
+cat("\nModels Summary Comparison:\n")
+cat("AIC Backward:", AIC(backward_aic), "\n")
+cat("AIC Forward:", AIC(forward_aic), "\n")
+cat("BIC Backward:", BIC(backward_bic), "\n")
+cat("BIC Forward:", BIC(forward_bic), "\n")
+````
+## (D)
+````{r}
+library(glmnet)
+library(boot)
+
+index <- sample(seq_len(nrow(data)), size = 2/3 * nrow(data))
+trainData <- data[index, ]
+testData <- data[-index, ]
+
+X_train <- as.matrix(trainData[, -ncol(trainData)])
+y_train <- trainData$LC50
+X_test <- as.matrix(testData[, -ncol(testData)])
+y_test <- testData$LC50
+
+lambda_grid <- 10^seq(3, -2, lenght = 100)
+
+# Ridge regression (CV)
+cv_ridge <- cv.glmnet(X_train, y_train, alpha = 0, lambda = lambda_grid, nfolds = 10)
+optimal_lambda_cv <- cv_ridge$lambda.min
+
+cat("Optimal lambda from Cross-Validation:", optimal_lambda_cv, "\n")
+
+ridge_model <- glmnet(X_train, y_train, alpha = 0, lambda = optimal_lambda_cv)
+train_predictions_ridge <- predict(ridge_model, newx = X_train)
+test_predictions_ridge <- predict(ridge_model, newx = X_test)
+mse_train_ridge <- mean((y_train - train_predictions_ridge)^2)
+mse_test_ridge <- mean((y_test - test_predictions_ridge)^2)
+cat("Training Error (Ridge):", mse_train_ridge, "\n")
+cat("Test Error (Ridge):", mse_test_ridge, "\n")
+````
+```{r}
+# Ridge regression (bootstrap)
+bootstrap_mse <- function(data, indices, lambda) {
+  # Create bootstrap sample
+  bootstrap_sample <- data[indices, ]
+  X_bootstrap <- as.matrix(bootstrap_sample[, -ncol(bootstrap_sample)])
+  y_bootstrap <- bootstrap_sample$LC50
+  
+  model <- glmnet(X_bootstrap, y_bootstrap, alpha = 0, lambda = lambda)
+  y_pred <- predict(model, s = lambda, newx = X_test)
+  mse <- mean((y_test - y_pred)^2)
+  return(mse)
+}
+# Bootstrap for multiple lambda values
+bootstrap_results <- sapply(lambda_grid, function(lambda) {
+  mse_values <- replicate(100, boot(trainData, bootstrap_mse, R = 1, lambda = lambda)$t)
+  return(mean(mse_values))
+})
+```
+
+```{r}
+results_df <- data.frame(
+  Lambda = lambda_grid,
+  CV_MSE = sapply(lambda_grid, function(l) mean(cv_ridge$cvm[cv_ridge$lambda == l])),
+  Bootstrap_MSE = bootstrap_results
+)
+
+# Plot
+ggplot(results_df, aes(x = log10(Lambda)) ) +
+  geom_line(aes(y = CV_MSE, color = "Cross-Validation"), size = 1) +
+  geom_line(aes(y = Bootstrap_MSE, color = "Bootstrap"), size = 1) +
+  scale_color_manual(values = c("Cross-Validation" = "#1f77b4", "Bootstrap" = "#ff7f0e")) +
+  labs(title = "Comparison of MSE from Cross-Validation and Bootstrap",
+       x = "Log10(Lambda)",
+       y = "Mean Squared Error (MSE)",
+       color = "Method") +
+  theme_minimal()
+
+# Optimal Lambda from Bootstrap
+optimal_lambda_bootstrap <- lambda_grid[which.min(bootstrap_results)]
+cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
+```
+
+## {E}
+```{r}
+sapply(trainData, function(x) length(unique(x)))
+```
+
+```{r}
+library(mgcv)
+
+set.seed(2024)
+index <- sample(seq_len(nrow(data)), size = 2/3 * nrow(data))
+trainData <- data[index, ]
+testData <- data[-index, ]
+
+X_train <- as.matrix(trainData[, -ncol(trainData)])
+y_train <- trainData$LC50
+X_test <- as.matrix(testData[, -ncol(testData)])
+y_test <- testData$LC50
+
+# GAM less complexity (k = -1)
+gam_model_1 <- gam(LC50 ~ s(TPSA, k=1) + s(SAacc, k=1) + s(H050, k=1) + 
+                     s(MLOGP, k=1) + s(RDCHI, k=1) + s(GATS1p, k=1) +
+                     s(nN, k=1) + s(C040, k=1), data = trainData)
+
+pred_gam_train_1 <- predict(gam_model_1, newdata = trainData)
+pred_gam_test_1 <- predict(gam_model_1, newdata = testData)
+mse_train_gam_1 <- mean((y_train - pred_gam_train_1)^2)
+mse_test_gam_1 <- mean((y_test - pred_gam_test_1)^2)
+
+cat("Training Error (GAM - k=5):","\t",mse_train_gam_1, "\n")
+cat("Test Error (GAM - k=5):","\t",mse_test_gam_1, "\n")
+
+# GAM more complexity (k = 10)
+gam_model_2 <- gam(LC50 ~ s(TPSA, k=4) + s(SAacc, k=4) + s(H050, k=4) + 
+                     s(MLOGP, k=4) + s(RDCHI, k=4) + s(GATS1p, k=4) +
+                     s(nN, k=4) + s(C040, k=4), data = trainData)
+
+pred_gam_train_2 <- predict(gam_model_2, newdata = trainData)
+pred_gam_test_2 <- predict(gam_model_2, newdata = testData)
+mse_train_gam_2 <- mean((y_train - pred_gam_train_2)^2)
+mse_test_gam_2 <- mean((y_test - pred_gam_test_2)^2)
+
+cat("Training Error (GAM - k=10):","\t",mse_train_gam_2, "\n")
+cat("Test Error (GAM - k=10):","\t",mse_test_gam_2, "\n")
+```
+```{r}
+names(X_train)
+```
+## (F)
+```{r}
+library(rpart)
+library(rpart.plot)
+
+tree_model <- rpart(LC50 ~ ., data = trainData, method = "anova")
+rpart.plot(tree_model, main = "Regression Tree for LC50")
+printcp(tree_model)
+
+optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
+
+pruned_tree <- prune(tree_model, cp = optimal_cp)
+rpart.plot(pruned_tree, main = "Pruned Regression Tree for LC50")
+train_predictions_tree <- predict(pruned_tree, newdata = trainData)
+test_predictions_tree <- predict(pruned_tree, newdata = testData)
+
+mse_train_tree <- mean((trainData$LC50 - train_predictions_tree)^2)
+mse_test_tree <- mean((testData$LC50 - test_predictions_tree)^2)
+
+cat("Training Error (Tree):", mse_train_tree, "\n")
+cat("Test Error (Tree):", mse_test_tree, "\n")
+```
+```{r}
+library(tidyr)
+library(ggplot2)
+
+# Assuming error_train, error_train_dummy, mse_train_ridge, mse_train_gam_2, mse_train_tree
+# are already defined with the respective mean squared error values.
+
+model_comparison <- data.frame(
+  Model = c("Linear", "Linear (dummy)", "Ridge", "GAM", "Tree"),
+  Training_Error = c(error_train, error_train_dummy, mse_train_ridge, mse_train_gam_2, mse_train_tree),
+  Test_Error = c(error_test, error_test_dummy, mse_test_ridge, mse_test_gam_2, mse_test_tree)
+)
+
+# Print the model_comparison data frame
+print(model_comparison)
+
+# Convert to long format for ggplot
+model_comparison_long <- pivot_longer(model_comparison, 
+                                      cols = c("Training_Error", "Test_Error"), 
+                                      names_to = "Error_Type", 
+                                      values_to = "MSE")
+
+# Create the bar plot with proper legend
+ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  labs(title = "Comparison of Training and Test Errors",
+       x = "Model",
+       y = "Mean Squared Error (MSE)",
+       fill = "Error Type") +
+  scale_fill_manual(values = c("Training_Error" = "blue", "Test_Error" = "red"), 
+                    labels = c("Training_Error" = "Train Error", "Test_Error" = "Test Error")) +
+  theme_minimal()
+
+```
+# Problem 2: Classification
+## (A)

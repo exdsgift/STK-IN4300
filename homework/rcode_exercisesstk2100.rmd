@@ -1,0 +1,127 @@
+---
+title: "STK2100"
+author: "Alfonso Diz-Lois"
+date: "24-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+
+## Exercise 1
+
+### h
+
+```{r}
+ns=seq(10,100,5)
+p=5
+vbs=c()
+#sigma=1
+for (n in ns){
+X=cbind(1,array(rnorm(n*p),dim=c(n,p)))
+vbs=c(vbs,solve(t(X)%*%X)[1,1])
+}
+plot(ns,vbs,xlab="n",ylab="var(beta)")
+
+```
+
+
+```{r}
+set.seed(242)
+n=31
+#ps=seq(20,32)
+ps=seq(20,30)
+vbs=c()
+#sigma=1
+for (p in ps){
+X=cbind(1,array(rnorm(n*p),dim=c(n,p)))
+vbs=c(vbs,solve(t(X)%*%X)[1,1])
+}
+plot(ps,vbs,xlab="p",ylab="var(beta)")
+```
+When p approaches n, the matrix becomes closer to singular.
+
+## Exercise 4
+
+### a
+
+By simulations...
+
+```{r}
+n <- 30
+beta0 <- 1.0
+sig <- 1.0
+beta1v_a <- seq(0,2,by=0.1)
+N <- 100
+Pval <- matrix(nrow=length(beta1v),ncol=N)
+set.seed(123)
+for(i in 1:length(beta1v))
+{
+  for(j in 1:N)
+  {
+   beta1 <- beta1v[i]
+   x <- rnorm(n)
+   y <- rnorm(n,beta0+beta1*x,sig)
+   fit <- lm(y~x)
+   Pval[i,j] <- summary(fit)$coef["x",4]
+  }
+}
+alpha <- 0.05
+rej.rate_a <- rowMeans(Pval<alpha)
+plot(beta1v_a,rej.rate_a,type="l")
+```
+
+
+### c
+
+Modify the script to simulate the triplets 
+```{r}
+set.seed(123)
+#correlation
+rho=0.9
+
+for(i in 1:length(beta1v))
+{
+  for(j in 1:N)
+  {
+   beta1 <- beta1v[i]
+   x <- rnorm(n)
+   z<-rnorm(n)*sqrt(1-rho^2)+rho*x
+   y <- rnorm(n,beta0+beta1*x,sig)
+   fit <- lm(y~x+z)
+   Pval[i,j] <- summary(fit)$coef["x",4]
+  }
+}
+rej.rate <- rowMeans(Pval<alpha)
+plot(beta1v_a,rej.rate_a,type="l")
+lines(beta1v,rej.rate,type="l",col="blue")
+
+
+rho=0.99
+
+for(i in 1:length(beta1v))
+{
+  for(j in 1:N)
+  {
+   beta1 <- beta1v[i]
+   x <- rnorm(n)
+   z<-rnorm(n)*sqrt(1-rho^2)+rho*x
+   y <- rnorm(n,beta0+beta1*x,sig)
+   fit <- lm(y~x+z)
+   Pval[i,j] <- summary(fit)$coef["x",4]
+  }
+}
+rej.rate2 <- rowMeans(Pval<alpha)
+lines(beta1v,rej.rate2,col="green")
+
+```
+
+### e Are there some aspects that have not been taken into account in these simulation experiments?
+
+Many, such as how robust the method is with respect to the normality assumptions.
+
+
+
