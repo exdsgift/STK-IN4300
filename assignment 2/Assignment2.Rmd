@@ -3,6 +3,7 @@ title: "Regression and Classification"
 author: "Gabriele Durante"
 date: "2024-10-21"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -152,16 +153,20 @@ results_df <- data.frame(
 )
 
 # Plot
+mean_linear <- mean(results_df$Error[results_df$Model == "Linear Effects"])
+mean_dummy <- mean(results_df$Error[results_df$Model == "Dummy Encoding"])
+
 ggplot(results_df, aes(x = Error, fill = Model)) +
   geom_density(alpha = 0.5) +
+  geom_vline(aes(xintercept = mean_linear, color = "Linear Model Mean"), linetype = "dashed", size = 0.5) +
+  geom_vline(aes(xintercept = mean_dummy, color = "Dummy Model Mean"), linetype = "dashed", size = 0.5) +
   labs(title = "Empirical Distribution of Test Errors",
        x = "Test Error (MSE)",
        y = "Density") +
+  scale_color_manual(values = c("Linear Model Mean" = "blue", "Dummy Model Mean" = "red")) +
   theme_minimal()
-
-cat("Average Test Error (Linear):", avg_errors[1], "\n")
-cat("Average Test Error (Dummy):", avg_errors[2], "\n")
 ````
+
 ## (C)
 ````{r Backward Elimination}
 library(MASS)
@@ -249,6 +254,9 @@ bootstrap_results <- sapply(lambda_grid, function(lambda) {
   mse_values <- replicate(100, boot(trainData, bootstrap_mse, R = 1, lambda = lambda)$t)
   return(mean(mse_values))
 })
+# Optimal Lambda from Bootstrap
+optimal_lambda_bootstrap <- lambda_grid[which.min(bootstrap_results)]
+cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 ```
 
 ```{r}
@@ -262,16 +270,11 @@ results_df <- data.frame(
 ggplot(results_df, aes(x = log10(Lambda)) ) +
   geom_line(aes(y = CV_MSE, color = "Cross-Validation"), size = 1) +
   geom_line(aes(y = Bootstrap_MSE, color = "Bootstrap"), size = 1) +
-  scale_color_manual(values = c("Cross-Validation" = "#1f77b4", "Bootstrap" = "#ff7f0e")) +
   labs(title = "Comparison of MSE from Cross-Validation and Bootstrap",
        x = "Log10(Lambda)",
        y = "Mean Squared Error (MSE)",
        color = "Method") +
   theme_minimal()
-
-# Optimal Lambda from Bootstrap
-optimal_lambda_bootstrap <- lambda_grid[which.min(bootstrap_results)]
-cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 ```
 
 ## {E}
@@ -293,33 +296,32 @@ X_test <- as.matrix(testData[, -ncol(testData)])
 y_test <- testData$LC50
 
 # GAM less complexity (k = -1)
-gam_model_1 <- gam(LC50 ~ s(TPSA, k=1) + s(SAacc, k=1) + s(H050, k=1) + 
-                     s(MLOGP, k=1) + s(RDCHI, k=1) + s(GATS1p, k=1) +
-                     s(nN, k=1) + s(C040, k=1), data = trainData)
+k = 1
+gam_model_1 <- gam(LC50 ~ s(TPSA, k=k) + s(SAacc, k=k) + s(H050, k=k) + 
+                     s(MLOGP, k=k) + s(RDCHI, k=k) + s(GATS1p, k=k) +
+                     s(nN, k=k) + s(C040, k=k), data = trainData)
 
 pred_gam_train_1 <- predict(gam_model_1, newdata = trainData)
 pred_gam_test_1 <- predict(gam_model_1, newdata = testData)
 mse_train_gam_1 <- mean((y_train - pred_gam_train_1)^2)
 mse_test_gam_1 <- mean((y_test - pred_gam_test_1)^2)
 
-cat("Training Error (GAM - k=5):","\t",mse_train_gam_1, "\n")
-cat("Test Error (GAM - k=5):","\t",mse_test_gam_1, "\n")
+cat("Training Error (GAM - k=1):","\t",mse_train_gam_1, "\n")
+cat("Test Error (GAM - k=1):","\t",mse_test_gam_1, "\n")
 
-# GAM more complexity (k = 10)
-gam_model_2 <- gam(LC50 ~ s(TPSA, k=4) + s(SAacc, k=4) + s(H050, k=4) + 
-                     s(MLOGP, k=4) + s(RDCHI, k=4) + s(GATS1p, k=4) +
-                     s(nN, k=4) + s(C040, k=4), data = trainData)
+# GAM more complexity (k = 6)
+k = 6
+gam_model_2 <- gam(LC50 ~ s(TPSA, k=k) + s(SAacc, k=k) + s(H050, k=k) + 
+                     s(MLOGP, k=k) + s(RDCHI, k=k) + s(GATS1p, k=k) +
+                     s(nN, k=k) + s(C040, k=k), data = trainData)
 
 pred_gam_train_2 <- predict(gam_model_2, newdata = trainData)
 pred_gam_test_2 <- predict(gam_model_2, newdata = testData)
 mse_train_gam_2 <- mean((y_train - pred_gam_train_2)^2)
 mse_test_gam_2 <- mean((y_test - pred_gam_test_2)^2)
 
-cat("Training Error (GAM - k=10):","\t",mse_train_gam_2, "\n")
-cat("Test Error (GAM - k=10):","\t",mse_test_gam_2, "\n")
-```
-```{r}
-names(X_train)
+cat("Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n")
+cat("Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n")
 ```
 ## (F)
 ```{r}
@@ -327,28 +329,58 @@ library(rpart)
 library(rpart.plot)
 
 tree_model <- rpart(LC50 ~ ., data = trainData, method = "anova")
-rpart.plot(tree_model, main = "Regression Tree for LC50")
-printcp(tree_model)
 
+train_predictions_tree1 <- predict(tree_model, newdata = trainData)
+test_predictions_tree1 <- predict(tree_model, newdata = testData)
+
+mse_train_tree1 <- mean((trainData$LC50 - train_predictions_tree1)^2)
+mse_test_tree1 <- mean((testData$LC50 - test_predictions_tree1)^2)
+
+printcp(tree_model)
+cat("Training Error (Tree):", mse_train_tree1, "\n")
+cat("Test Error (Tree):", mse_test_tree1, "\n")
+```
+```{r}
+rpart.plot(tree_model, 
+           main = "Customized Regression Tree for LC50",
+           type = 3,
+           fallen.leaves = TRUE,
+           box.palette = "RdYlGn",
+           cex = 0.6,
+           tweak = 1,
+           split.cex = 0.9,
+           split.lty = 3,
+)
+```
+```{r}
 optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
 
 pruned_tree <- prune(tree_model, cp = optimal_cp)
-rpart.plot(pruned_tree, main = "Pruned Regression Tree for LC50")
 train_predictions_tree <- predict(pruned_tree, newdata = trainData)
 test_predictions_tree <- predict(pruned_tree, newdata = testData)
 
 mse_train_tree <- mean((trainData$LC50 - train_predictions_tree)^2)
 mse_test_tree <- mean((testData$LC50 - test_predictions_tree)^2)
 
+rpart.plot(pruned_tree, 
+           main = "Pruned Regression Tree for LC50",
+           type = 3,
+           fallen.leaves = TRUE,
+           box.palette = "RdYlGn",
+           cex = 0.6,
+           tweak = 1,
+           split.cex = 0.9,
+           split.lty = 3,
+)
+```
+```{r}
+printcp(pruned_tree)
 cat("Training Error (Tree):", mse_train_tree, "\n")
 cat("Test Error (Tree):", mse_test_tree, "\n")
 ```
+
 ```{r}
 library(tidyr)
-library(ggplot2)
-
-# Assuming error_train, error_train_dummy, mse_train_ridge, mse_train_gam_2, mse_train_tree
-# are already defined with the respective mean squared error values.
 
 model_comparison <- data.frame(
   Model = c("Linear", "Linear (dummy)", "Ridge", "GAM", "Tree"),
@@ -356,26 +388,161 @@ model_comparison <- data.frame(
   Test_Error = c(error_test, error_test_dummy, mse_test_ridge, mse_test_gam_2, mse_test_tree)
 )
 
-# Print the model_comparison data frame
-print(model_comparison)
-
-# Convert to long format for ggplot
 model_comparison_long <- pivot_longer(model_comparison, 
                                       cols = c("Training_Error", "Test_Error"), 
                                       names_to = "Error_Type", 
                                       values_to = "MSE")
 
-# Create the bar plot with proper legend
+# Plot
 ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
   labs(title = "Comparison of Training and Test Errors",
        x = "Model",
        y = "Mean Squared Error (MSE)",
        fill = "Error Type") +
-  scale_fill_manual(values = c("Training_Error" = "blue", "Test_Error" = "red"), 
-                    labels = c("Training_Error" = "Train Error", "Test_Error" = "Test Error")) +
+  # scale_fill_manual(values = c("Training_Error" = "blue", "Test_Error" = "red"), labels = c("Training_Error" = "Train Error", "Test_Error" = "Test Error")) +
   theme_minimal()
 
+# print(model_comparison)
 ```
+```{r}
+ggplot(model_comparison_long, aes(x = Model, y = MSE, color = Error_Type, group = Error_Type)) +
+  geom_line(size = 1) +
+  geom_point(size = 2.5) +
+  labs(title = "Line Plot Comparison of Training and Test Errors",
+       x = "Model",
+       y = "Mean Squared Error (MSE)",
+       color = "Error Type") +
+  # scale_color_manual(values = c("blue", "red")) +
+  theme_minimal()
+```
+
 # Problem 2: Classification
 ## (A)
+```{r}
+library(mlbench)
+data(PimaIndiansDiabetes2)
+df <- PimaIndiansDiabetes2
+head(df)
+```
+```{r}
+na_count <- sapply(df, function(x) sum(is.na(x)))
+print(na_count)
+```
+```{r}
+# KNN imputation
+
+library(mlbench)
+library(VIM)
+
+df_imp <- kNN(df, k = 5)
+df_imp <- df_imp[, 1:9]
+df_imp$diabetes <- as.factor(df_imp$diabetes)
+head(df_imp)
+```
+```{r}
+na_count_df_imp <- sapply(df_imp, function(x) sum(is.na(x)))
+print(na_count_df_imp)
+```
+
+```{r}
+library(caret)
+set.seed(2024)
+trainIndex <- createDataPartition(df_imp$diabetes, 
+                                  p = 2/3, 
+                                  list = FALSE, 
+                                  times = 1)
+
+trainData <- df_imp[trainIndex, ]
+testData <- df_imp[-trainIndex, ]
+```
+
+```{r}
+library(class)
+library(mlbench)
+# Function: cross-validated k-NN errors
+cv_knn_errors <- function(data, k_values, cv_type) {
+    errors <- numeric(length(k_values))
+    for (i in seq_along(k_values)) {
+        k <- k_values[i]
+        if (cv_type == "LOOCV") {
+            control <- trainControl(method = "LOOCV")
+        } else if (cv_type == "10-fold") {
+            control <- trainControl(method = "cv", number = 10)
+        }
+        
+        model <- train(diabetes ~ ., data = data, method = "knn",
+                       trControl = control, tuneGrid = data.frame(k = k))
+        errors[i] <- min(model$results$Accuracy)
+    }
+    return(1 - errors)
+}
+
+# k values (tested that >25 is too much)
+k_values <- 1:25
+
+# 5 fold
+errors_10fold <- cv_knn_errors(df_imp, k_values, "10-fold")
+
+# LOOCV
+errors_loocv <- cv_knn_errors(df_imp, k_values, "LOOCV")
+
+trainIndex <- createDataPartition(df_imp$diabetes, p = .67, list = FALSE)
+trainData <- df_imp[trainIndex, ]
+testData <- df_imp[-trainIndex, ]
+
+# Loop for each k
+test_errors <- numeric(length(k_values))
+for (i in seq_along(k_values)) {
+    k <- k_values[i]
+    predictions <- knn(train = trainData[,-ncol(trainData)], 
+                       test = testData[,-ncol(testData)],
+                       cl = trainData$diabetes, k = k)
+    test_errors[i] <- mean(predictions != testData$diabetes)
+}
+```
+
+```{r}
+# Create a data frame for plotting
+error_data <- data.frame(
+    k = k_values,
+    LOOCV_Error = errors_loocv,
+    Fold10_Error = errors_10fold,
+    Test_Error = test_errors
+)
+
+error_data_long <- reshape2::melt(error_data, id.vars = "k")
+
+# Plotting
+ggplot(error_data_long, aes(x = k, y = value, color = variable)) +
+    geom_line(size = 0.8) +
+    geom_point(size = 1.3) +
+    labs(title = "k-NN Classifier Errors",
+         x = "Number of Neighbors (k)",
+         y = "Error Rate",
+         color = "Error Type") +
+    scale_x_continuous(breaks = k_values) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "bottom")
+```
+## (B)
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

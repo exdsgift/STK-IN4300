@@ -9,3 +9,9 @@ mgcv
 rpart
 rpart.plot
 tidyr
+mlbench
+colorspace
+VIM
+lattice
+caret
+class
