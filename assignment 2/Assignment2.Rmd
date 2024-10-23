@@ -1,12 +1,19 @@
 ---
-title: "Regression and Classification"
+title: "Regression and Classification: A Comprehensive Analysis"
 author: "Gabriele Durante"
-date: "2024-10-21"
 output:
-  pdf_document: default
   html_document:
-    df_print: paged
+  df_print: paged
+  pdf_document: default
+university: "University of Oslo"
+course: "STK-IN4300: Statistical Learning Methods in Data Science"
 ---
+
+In this report, we aim to explore various statistical learning methodologies applied to regression and classification problems.
+
+In the first part of the report, we examine linear regression models applied to aquatic toxicity data. This involves both traditional linear effects and alternative representations using dummy encoding, providing insight into how these transformations impact model fit and predictive accuracy. We apply techniques such as backward elimination and forward selection to perform variable selection, comparing criteria like AIC and BIC. Moreover, we introduce regularization techniques, specifically ridge regression, to address potential overfitting, followed by a discussion on parameter optimization via cross-validation and bootstrap methods. To extend our analysis to non-linear modeling, we apply generalized additive models (GAMs) with smoothing splines to capture more complex relationships within the data. Regression trees are explored, where we employ cost-complexity pruning to optimize tree size, emphasizing the balance between model complexity and prediction accuracy.
+
+In the second part, we shift to a classification problem using the Pima Indians Diabetes dataset. Here, we experiment with k-nearest neighbors (k-NN), generalized additive models, classification trees, bagged trees, random forests, and neural networks. Each method is rigorously evaluated, using cross-validation techniques to assess generalization error and performance trade-offs. The report concludes with a comparative analysis of these models, offering insights into the advantages and limitations of different statistical learning approaches within the context of high-dimensional data.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -14,50 +21,58 @@ knitr::opts_chunk$set(
   warning = FALSE,             # Suppress warnings in the document
   message = FALSE,             # Suppress messages in the document
   fig.align = "center",        # Center align figures
-  fig.width = 6,             # Set default width of figures to fit two-column layout
+  fig.width = 6,               # Set default width of figures to fit two-column layout
   fig.height = 4,              # Set default height of figures
   fig.pos = "H",               # Force figure placement exactly where they are called
   cache = TRUE                 # Enable caching
 )
 ```
 
-## R Markdown
+```{r, echo=FALSE, results= 'hide'}
+data <- read.csv("/Users/gabrieledurante/Documents/UiO/STK-IN4300 - Statistical Learning/assignment 2/qsar_aquatic_toxicity.csv",
+                 sep=";", header = FALSE)
+colnames(data) <- c("TPSA", "SAacc", "H050",
+                    "MLOGP", "RDCHI", "GATS1p",
+                    "nN", "C040", "LC50")
+```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Regression Model Comparison for Predicting Aquatic Toxicity
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+In this study, we investigate the acute aquatic toxicity of various organic molecules, as quantified by the lethal concentration (LC50) that induces mortality in 50% of the planktonic crustacean Daphnia magna over a 48-hour exposure period. The objective is to develop predictive models that leverage molecular descriptors to ascertain the toxicity levels of these compounds. To this end, we utilize a dataset comprising 546 observations, which is sourced from the UCI Machine Learning Repository. The dataset encompasses eight key molecular descriptors identified as significant predictors of LC50:
 
-```{r, echo=FALSE, results='hide'}
-data <- read.csv("/Users/gabrieledurante/Documents/UiO/STK-IN4300 - Statistical Learning/assignment 2/qsar_aquatic_toxicity.csv",sep=";", header = FALSE)
-colnames(data) <- c("TPSA", "SAacc", "H050", "MLOGP", "RDCHI", "GATS1p", "nN", "C040", "LC50")
-head(data)
-dim(data)
+-   TPSA: Topological Polar Surface Area, calculated via a contribution method considering the presence of nitrogen, oxygen, potassium, and sulfur.
+-   SAacc: Van der Waals Surface Area (VSA) of hydrogen bond acceptor atoms.
+-   H050: The count of hydrogen atoms bonded to heteroatoms.
+-   MLOGP: A measure of lipophilicity, serving as a critical determinant of narcosis.
+-   RDCHI: A topological index encapsulating information related to molecular size and branching.
+-   GATS1p: An indicator of molecular polarizability.
+-   nN: The total number of nitrogen atoms within the molecule.
+-   C040: The count of specific carbon atom types, including those found in esters, carboxylic acids, thioesters, carbamic acids, and nitriles.
+
+```{r Summary}
 summary(data)
-str(data)
 colSums(is.na(data))
 ```
 
-# Problem 1: regression
-## (A)
+With a complete dataset comprising 546 observations, we can ensure that our modeling efforts are not hindered by data gaps. This completeness facilitates a more accurate assessment of the relationships between the molecular descriptors and LC50, allowing for a more confident interpretation of the findings and their implications in predicting aquatic toxicity.
 
-```{r Splitting, echo=FALSE}
+## Linear and Dummy Encoding Approach
+
+To evaluate the predictive models effectively, we partition the dataset into training and testing subsets. A random seed is set using `set.seed(2024)` to ensure reproducibility. The training set is constructed by sampling approximately two-thirds of the total observations with the command `index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))`. 
+
+- Training Data: `trainData <- data[index, ]` comprises the selected observations for model fitting.
+- Testing Data: `testData <- data[-index, ]` contains the remaining observations for model evaluation.
+
+```{r Splitting, echo=TRUE}
 # build the dataset for the training
 set.seed(2024)
 index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))
 trainData <- data[index, ]
 testData <- data[-index, ]
-
-# y_train <- trainData$LC50
-# X_train <- trainData[, !names(trainData) %in% c("LC50")]
-# y_test <- testData$LC50
-# X_test <- testData[, !names(testData) %in% c("LC50")]
-
-# data.train <- as.data.frame(cbind(y_train, X_train))
-# colnames(data.train)[1] <- 'y'
 ```
-
-
-```{r Linear Model}
+### Linear Model
+First we fitted a linear regression model to predict LC50 using molecular descriptors from the training dataset. The model's performance is summarized as follows:
+```{r Linear Model, echo=TRUE}
 set.seed(2024)
 ### Modeling Count Variables Directly as Linear Effects
 model1 <- lm(LC50 ~., data = trainData)
@@ -67,14 +82,23 @@ pred_model1_test <- predict(model1, newdata = testData)
 
 error_train <- mean((pred_model1_train - trainData$LC50)^2)
 error_test <- mean((pred_model1_test - testData$LC50)^2)
-
-cat("Training Error (Linear):", error_train, "\n")
-cat("Test Error (Linear):", error_test, "\n")
-
-summary(model1)
 ```
 
-````{r Dummy Linear model}
+```{r}
+cat("Training Error (Linear):", error_train, "\n")
+cat("Test Error (Linear):", error_test, "\n")
+```
+
+```{r summary Model 1}
+summary(model1)
+```
+The R-squared value of 0.472 indicates that while the linear model captures some of the variability in the data, it leaves a considerable amount unexplained. Highly significant predictors, such as TPSA (p < 2e-16) and MLOGP (p < 3.83e-10), reveal strong relationships with LC50, indicating that increased topological polar surface area and greater lipophilicity correlate with higher toxicity levels. 
+
+### Dummy Linear Model
+
+After, model dummy encoding was applied to the count variables nN, C040, and H050 in both the training and test datasets to transform these continuous variables into binary indicators. Specifically, values greater than zero were recoded to 1, while values of zero were recoded to 0. This approach allows the linear model to assess the presence or absence of these variables as factors influencing acute aquatic toxicity. Predictions were generated for both the training and test datasets, enabling the calculation of the training error and test error.
+
+```{r Dummy Linear model}
 ### Dummy Encoding for Count Variables
 train_dummy <- trainData
 test_dummy <- testData
@@ -94,15 +118,25 @@ pred_model2_test <- predict(model2, newdata = test_dummy)
 
 error_train_dummy <- mean((pred_model2_train - train_dummy$LC50)^2)
 error_test_dummy <- mean((pred_model2_test - test_dummy$LC50)^2)
+```
 
+```{r}
 cat("Training Error (Dummy):", error_train_dummy, "\n")
 cat("Test Error (Dummy):", error_test_dummy, "\n")
+```
 
+```{r}
 summary(model2)
+```
+The training error for the dummy-encoded model is 1.424, while the test error is 1.617. Compared to the previous linear model, which yielded a training error of 1.377 and a test error of 1.557, this model exhibits slightly higher error rates on both the training and test datasets. This increase suggests that the dummy encoding may not have improved the model's predictive performance. This could indicate a potential loss of information due to the transformation of continuous variables into binary indicators, which could limit the model's ability to capture the nuances of the underlying relationships between predictors and the response variable.
 
-````
-## (B)
-````{r 200 times}
+The overall model performance is reflected in the Multiple R-squared value of 0.454, while the adjusted R-squared of 0.4417 accounts for the number of predictors in the model. The F-statistic (36.9) with a p-value < 2.2e-16 indicates that the model is statistically significant.
+
+## Empirical Error Distribution Analysis in Regression Models
+
+The function `perform_analysis` is defined to conduct repeated evaluations of the two linear models defined before on the same dataset and returns the values of error test and train. The analysis is repeated 200 times using the `replicate` function, enabling the computation of average test errors for both models. The results are then visualized using a density plot, illustrating the empirical distribution of test errors for each model.
+
+```{r 200 times, echo=TRUE}
 library(ggplot2)
 
 perform_analysis <- function(data) {
@@ -139,9 +173,9 @@ perform_analysis <- function(data) {
 
   return(c(error_test_200_lm, error_test_200_dummy))
 }
-````
+```
 
-````{r}
+```{r, echo=FALSE, results='asis'}
 num_repeats <- 200
 results <- replicate(num_repeats, perform_analysis(data))
 
@@ -158,37 +192,50 @@ mean_dummy <- mean(results_df$Error[results_df$Model == "Dummy Encoding"])
 
 ggplot(results_df, aes(x = Error, fill = Model)) +
   geom_density(alpha = 0.5) +
-  geom_vline(aes(xintercept = mean_linear, color = "Linear Model Mean"), linetype = "dashed", size = 0.5) +
-  geom_vline(aes(xintercept = mean_dummy, color = "Dummy Model Mean"), linetype = "dashed", size = 0.5) +
+  geom_vline(aes(xintercept = mean_linear, color = "Linear Model Mean"),
+             linetype = "dashed", size = 0.5) +
+  geom_vline(aes(xintercept = mean_dummy, color = "Dummy Model Mean"),
+             linetype = "dashed", size = 0.5) +
   labs(title = "Empirical Distribution of Test Errors",
        x = "Test Error (MSE)",
        y = "Density") +
-  scale_color_manual(values = c("Linear Model Mean" = "blue", "Dummy Model Mean" = "red")) +
-  theme_minimal()
-````
+  scale_color_manual(values = c("Linear Model Mean" = "blue",
+                                "Dummy Model Mean" = "red")) +
+  theme_light() +
+  theme(panel.grid = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+```
+The graph presents a density plot comparing the test error distributions for the two models. The aim should be illustrate the performance of the models on unseen data and their reliability, focusing on the variability and central tendency of their respective errors. The Linear Model exhibits a narrower distribution centered around a lower MSE compared to the Dummy Model, whose distribution appears wider and shifted slightly to the right, indicating higer average test error. Basically, the tigter distribution and lower mean MSE of the Linear Model suggest that it generalize better to the test set compared to the dummy model.
 
-## (C)
-````{r Backward Elimination}
+## Variable Selection Methods in Linear Regression
+
+```{r Backward Elimination}
 library(MASS)
 library(leaps)
 
 # Backward Elimination
 full_model <- lm(LC50 ~ ., data = trainData)
-backward_aic <- stepAIC(full_model, direction = "backward", k = 2, trace = FALSE)
+backward_aic <- stepAIC(full_model, direction = "backward",
+                        k = 2, trace = FALSE)
 summary(backward_aic)
-backward_bic <- stepAIC(full_model, direction = "backward", k = log(nrow(trainData)), trace = FALSE)
+backward_bic <- stepAIC(full_model, direction = "backward",
+                        k = log(nrow(trainData)), trace = FALSE)
 summary(backward_bic)
-````
+```
+
 ```{r Forward Selection}
 # Forward Selection
 null_model <- lm(LC50 ~ 1, data = trainData)
-forward_aic <- stepAIC(null_model, direction = "forward", scope = formula(full_model), k = 2, trace = FALSE)
+forward_aic <- stepAIC(null_model, direction = "forward",
+                       scope = formula(full_model), k = 2, trace = FALSE)
 summary(forward_aic)
-forward_bic <- stepAIC(null_model, direction = "forward", scope = formula(full_model), k = log(nrow(trainData)), trace = FALSE)
+forward_bic <- stepAIC(null_model, direction = "forward",
+                       scope = formula(full_model), k = log(nrow(trainData)), trace = FALSE)
 summary(forward_bic)
 ```
 
-````{r Compare Models}
+```{r Compare Models}
 # Compare Models
 cat("Backward Elimination (AIC) Model:\n")
 print(backward_aic$call)
@@ -205,9 +252,11 @@ cat("AIC Backward:", AIC(backward_aic), "\n")
 cat("AIC Forward:", AIC(forward_aic), "\n")
 cat("BIC Backward:", BIC(backward_bic), "\n")
 cat("BIC Forward:", BIC(forward_bic), "\n")
-````
-## (D)
-````{r}
+```
+
+## Ridge Regression Model Optimization
+
+```{r}
 library(glmnet)
 library(boot)
 
@@ -223,19 +272,22 @@ y_test <- testData$LC50
 lambda_grid <- 10^seq(3, -2, lenght = 100)
 
 # Ridge regression (CV)
-cv_ridge <- cv.glmnet(X_train, y_train, alpha = 0, lambda = lambda_grid, nfolds = 10)
+cv_ridge <- cv.glmnet(X_train, y_train, alpha = 0,
+                      lambda = lambda_grid, nfolds = 10)
 optimal_lambda_cv <- cv_ridge$lambda.min
 
 cat("Optimal lambda from Cross-Validation:", optimal_lambda_cv, "\n")
 
-ridge_model <- glmnet(X_train, y_train, alpha = 0, lambda = optimal_lambda_cv)
+ridge_model <- glmnet(X_train, y_train, alpha = 0,
+                      lambda = optimal_lambda_cv)
 train_predictions_ridge <- predict(ridge_model, newx = X_train)
 test_predictions_ridge <- predict(ridge_model, newx = X_test)
 mse_train_ridge <- mean((y_train - train_predictions_ridge)^2)
 mse_test_ridge <- mean((y_test - test_predictions_ridge)^2)
 cat("Training Error (Ridge):", mse_train_ridge, "\n")
 cat("Test Error (Ridge):", mse_test_ridge, "\n")
-````
+```
+
 ```{r}
 # Ridge regression (bootstrap)
 bootstrap_mse <- function(data, indices, lambda) {
@@ -251,7 +303,8 @@ bootstrap_mse <- function(data, indices, lambda) {
 }
 # Bootstrap for multiple lambda values
 bootstrap_results <- sapply(lambda_grid, function(lambda) {
-  mse_values <- replicate(100, boot(trainData, bootstrap_mse, R = 1, lambda = lambda)$t)
+  mse_values <- replicate(100, boot(trainData, bootstrap_mse, R = 1,
+                                    lambda = lambda)$t)
   return(mean(mse_values))
 })
 # Optimal Lambda from Bootstrap
@@ -262,7 +315,8 @@ cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 ```{r}
 results_df <- data.frame(
   Lambda = lambda_grid,
-  CV_MSE = sapply(lambda_grid, function(l) mean(cv_ridge$cvm[cv_ridge$lambda == l])),
+  CV_MSE = sapply(lambda_grid,
+                  function(l) mean(cv_ridge$cvm[cv_ridge$lambda == l])),
   Bootstrap_MSE = bootstrap_results
 )
 
@@ -274,10 +328,15 @@ ggplot(results_df, aes(x = log10(Lambda)) ) +
        x = "Log10(Lambda)",
        y = "Mean Squared Error (MSE)",
        color = "Method") +
-  theme_minimal()
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
 ```
 
-## {E}
+## Non-linear Modeling Using Generalized Additive Models
+
 ```{r}
 sapply(trainData, function(x) length(unique(x)))
 ```
@@ -323,7 +382,9 @@ mse_test_gam_2 <- mean((y_test - pred_gam_test_2)^2)
 cat("Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n")
 cat("Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n")
 ```
-## (F)
+
+## Regression Tree Model with Cost-Complexity Pruning
+
 ```{r}
 library(rpart)
 library(rpart.plot)
@@ -340,6 +401,7 @@ printcp(tree_model)
 cat("Training Error (Tree):", mse_train_tree1, "\n")
 cat("Test Error (Tree):", mse_test_tree1, "\n")
 ```
+
 ```{r}
 rpart.plot(tree_model, 
            main = "Customized Regression Tree for LC50",
@@ -352,6 +414,7 @@ rpart.plot(tree_model,
            split.lty = 3,
 )
 ```
+
 ```{r}
 optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
 
@@ -373,19 +436,26 @@ rpart.plot(pruned_tree,
            split.lty = 3,
 )
 ```
+
 ```{r}
 printcp(pruned_tree)
 cat("Training Error (Tree):", mse_train_tree, "\n")
 cat("Test Error (Tree):", mse_test_tree, "\n")
 ```
 
+## Comparative Analysis of Regression Models
+
+### Training and Test Error Assessment for Various Models
+
 ```{r}
 library(tidyr)
 
 model_comparison <- data.frame(
   Model = c("Linear", "Linear (dummy)", "Ridge", "GAM", "Tree"),
-  Training_Error = c(error_train, error_train_dummy, mse_train_ridge, mse_train_gam_2, mse_train_tree),
-  Test_Error = c(error_test, error_test_dummy, mse_test_ridge, mse_test_gam_2, mse_test_tree)
+  Training_Error = c(error_train, error_train_dummy,
+                     mse_train_ridge, mse_train_gam_2, mse_train_tree),
+  Test_Error = c(error_test, error_test_dummy,
+                 mse_test_ridge, mse_test_gam_2, mse_test_tree)
 )
 
 model_comparison_long <- pivot_longer(model_comparison, 
@@ -400,35 +470,44 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
        x = "Model",
        y = "Mean Squared Error (MSE)",
        fill = "Error Type") +
-  # scale_fill_manual(values = c("Training_Error" = "blue", "Test_Error" = "red"), labels = c("Training_Error" = "Train Error", "Test_Error" = "Test Error")) +
-  theme_minimal()
-
-# print(model_comparison)
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
 ```
+
 ```{r}
-ggplot(model_comparison_long, aes(x = Model, y = MSE, color = Error_Type, group = Error_Type)) +
-  geom_line(size = 1) +
-  geom_point(size = 2.5) +
+ggplot(model_comparison_long, aes(x = Model, y = MSE,
+                                  color = Error_Type, group = Error_Type)) +
+  geom_line(size = 0.9) +
   labs(title = "Line Plot Comparison of Training and Test Errors",
        x = "Model",
        y = "Mean Squared Error (MSE)",
        color = "Error Type") +
-  # scale_color_manual(values = c("blue", "red")) +
-  theme_minimal()
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
 ```
 
-# Problem 2: Classification
-## (A)
+# Classification Model Comparison for Diabetes Prediction
+
+## k-NN Classification and Cross-Validation Comparison
+
 ```{r}
 library(mlbench)
 data(PimaIndiansDiabetes2)
 df <- PimaIndiansDiabetes2
 head(df)
 ```
+
 ```{r}
 na_count <- sapply(df, function(x) sum(is.na(x)))
 print(na_count)
 ```
+
 ```{r}
 # KNN imputation
 
@@ -440,6 +519,7 @@ df_imp <- df_imp[, 1:9]
 df_imp$diabetes <- as.factor(df_imp$diabetes)
 head(df_imp)
 ```
+
 ```{r}
 na_count_df_imp <- sapply(df_imp, function(x) sum(is.na(x)))
 print(na_count_df_imp)
@@ -455,6 +535,13 @@ trainIndex <- createDataPartition(df_imp$diabetes,
 
 trainData <- df_imp[trainIndex, ]
 testData <- df_imp[-trainIndex, ]
+
+trainData$diabetes <- ifelse(trainData$diabetes == "pos", 1, 0)
+testData$diabetes <- ifelse(testData$diabetes == "pos", 1, 0)
+trainData$diabetes <- as.factor(trainData$diabetes)
+testData$diabetes <- as.factor(testData$diabetes)
+
+head(trainData)
 ```
 
 ```{r}
@@ -515,34 +602,195 @@ error_data_long <- reshape2::melt(error_data, id.vars = "k")
 
 # Plotting
 ggplot(error_data_long, aes(x = k, y = value, color = variable)) +
-    geom_line(size = 0.8) +
-    geom_point(size = 1.3) +
+    geom_line(size = 0.7) +
+    # geom_point(size = 1.3) +
     labs(title = "k-NN Classifier Errors",
          x = "Number of Neighbors (k)",
          y = "Error Rate",
          color = "Error Type") +
     scale_x_continuous(breaks = k_values) +
-    theme_minimal() +
+    theme_light() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          legend.position = "bottom")
+          legend.position = "bottom",
+          panel.grid = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          text = element_text(size = 10))
 ```
-## (B)
+
+## Generalized Additive Model for Diabetes Prediction
+
+```{r}
+library(caret)
+library(mgcv)
+library(dplyr)
+library(broom)
+
+# model
+gam_model <- gam(diabetes ~ s(pregnant) + s(glucose) + s(pressure) + 
+                 s(triceps) + s(insulin) + s(mass) + 
+                 s(pedigree) + s(age), data = trainData, family = binomial)
+summary(gam_model)
+```
+
+```{r}
+# library(MASS)
+# # full model
+# full_model <- gam(diabetes ~ s(pregnant) + s(glucose) + s(pressure) + 
+#                    s(triceps) + s(insulin) + s(mass) + 
+#                    s(pedigree) + s(age), 
+#                    data = trainData, family = binomial)
+# # stepwise AIC
+# selected_model <- step(full_model, direction = "backward")
+# summary(selected_model)
+```
+
+## Tree-Based Methods for Diabetes Classification
+
+```{r Classification Tree}
+library(rpart)
+library(ipred)
+library(randomForest)
+library(caret)
+
+classification_tree <- rpart(diabetes ~ ., data = trainData, method = "class")
+
+tree_train_pred <- predict(classification_tree, trainData, type = "class")
+tree_test_pred <- predict(classification_tree, testData, type = "class")
+
+# error
+tree_train_error <- mean(tree_train_pred != trainData$diabetes)
+tree_test_error <- mean(tree_test_pred != testData$diabetes)
+
+cat("Classification Tree Training Error:", tree_train_error, "\n")
+cat("Classification Tree Test Error:", tree_test_error, "\n")
+```
+
+```{r Ensemble of Bagged Tree}
+bagged_trees <- bagging(diabetes ~ ., data = trainData)
+
+bagged_train_pred <- predict(bagged_trees, trainData)
+bagged_test_pred <- predict(bagged_trees, testData)
+
+# error
+bagged_train_error <- mean(bagged_train_pred != trainData$diabetes)
+bagged_test_error <- mean(bagged_test_pred != testData$diabetes)
+
+cat("Bagged Trees Training Error:", bagged_train_error, "\n")
+cat("Bagged Trees Test Error:", bagged_test_error, "\n")
+```
+
+```{r Random Forest}
+# Fit the random forest
+random_forest <- randomForest(diabetes ~ ., data = trainData)
+
+# Predict on training and test data
+rf_train_pred <- predict(random_forest, trainData)
+rf_test_pred <- predict(random_forest, testData)
+
+# Calculate training and test error
+rf_train_error <- mean(rf_train_pred != trainData$diabetes)
+rf_test_error <- mean(rf_test_pred != testData$diabetes)
+
+cat("Random Forest Training Error:", rf_train_error, "\n")
+cat("Random Forest Test Error:", rf_test_error, "\n")
+```
+
+```{r Plot Comparison}
+# Store the errors in a data frame
+results <- data.frame(
+  Model = c("Classification Tree", "Bagged Trees", "Random Forest"),
+  Training_Error = c(tree_train_error, bagged_train_error, rf_train_error),
+  Test_Error = c(tree_test_error, bagged_test_error, rf_test_error)
+)
+
+# Reshape the data for ggplot
+results_long <- reshape2::melt(results, id.vars = "Model", variable.name = "Error_Type", value.name = "Error")
+
+ggplot(results_long, aes(x = Model, y = Error, fill = Error_Type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9),
+           width = 0.7) +
+  geom_text(aes(label = round(Error, 3)),
+            position = position_dodge(width = 0.9),
+            vjust = -0.5, size = 2) +  # Data labels
+  theme_light() +
+  labs(title = "Comparison of Training and Test Errors",
+       x = "Model",
+       y = "Error Rate",
+       fill = "Error Type") +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        axis.title = element_text(),
+        text = element_text(size = 10))
+```
+
+## Neural Network Modeling for Diabetes Prediction
+
+```{r}
+library(nnet)
+library(caret)
+
+neurons <- seq(1, 100, by = 5)
+
+# Initializing
+train_errors <- c()
+test_errors <- c()
+
+# Loop
+for (n in neurons) {
+  # Fit NN
+  nn_model <- nnet(diabetes ~ ., data = trainData,
+                   size = n, linout = FALSE, maxit = 500, trace = FALSE)
+  
+  # Train
+  train_pred <- predict(nn_model, trainData)
+  train_pred_class <- ifelse(train_pred > 0.5, 1, 0)  # Convert to binary
+  train_error <- mean(train_pred_class != trainData$diabetes)
+  train_errors <- c(train_errors, train_error)
+  
+  # Test
+  test_pred <- predict(nn_model, testData)
+  test_pred_class <- ifelse(test_pred > 0.5, 1, 0)  # Convert to binary
+  test_error <- mean(test_pred_class != testData$diabetes)
+  test_errors <- c(test_errors, test_error)
+}
+
+# Results
+error_results <- data.frame(
+  Neurons = neurons,
+  Training_Error = train_errors,
+  Test_Error = test_errors
+)
+print(error_results)
+
+# Choose the optimal number of neurons based on test error
+optimal_neurons <- neurons[which.min(test_errors)]
+cat("Optimal number of neurons:", optimal_neurons, "\n")
+
+```
+
+```{r}
+library(ggplot2)
+error_results_long <- reshape2::melt(error_results,
+                                     id.vars = "Neurons", 
+                                     variable.name = "Error_Type", 
+                                     value.name = "Error")
+
+ggplot(error_results_long, aes(x = Neurons, y = log10(Error),
+                               color = Error_Type)) +
+  geom_line(size = 0.7) +
+  labs(title = "Training and Test Errors for Neural Network",
+       x = "Number of Neurons",
+       y = "log(Error Rate)") +
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+```
+
+## Comparing Classification Methods for Diabetes Analysis
 
 ```{r}
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -15,3 +15,8 @@ VIM
 lattice
 caret
 class
+dplyr
+broom
+ipred
+randomForest
+nnet
