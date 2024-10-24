@@ -85,8 +85,9 @@ error_test <- mean((pred_model1_test - testData$LC50)^2)
 ```
 
 ```{r}
-cat("Training Error (Linear):", error_train, "\n")
-cat("Test Error (Linear):", error_test, "\n")
+cat(paste(
+  "Training Error (Linear):","\t", error_train, "\n",
+  "Test Error (Linear):","\t","\t", error_test, "\n"))
 ```
 
 ```{r summary Model 1}
@@ -121,8 +122,9 @@ error_test_dummy <- mean((pred_model2_test - test_dummy$LC50)^2)
 ```
 
 ```{r}
-cat("Training Error (Dummy):", error_train_dummy, "\n")
-cat("Test Error (Dummy):", error_test_dummy, "\n")
+cat(paste(
+  "Training Error (Dummy):","\t", error_train_dummy, "\n",
+  "Test Error (Dummy):","\t\t", error_test_dummy, "\n"))
 ```
 
 ```{r}
@@ -299,7 +301,7 @@ cv_ridge <- cv.glmnet(X_train, y_train, alpha = 0,
 optimal_lambda_cv <- cv_ridge$lambda.min
 ```
 
-```{r, echo=FALSE, results='asis'}
+```{r}
 cat("Optimal lambda from Cross-Validation:", optimal_lambda_cv, "\n")
 ```
 
@@ -315,11 +317,9 @@ mse_test_ridge <- mean((y_test - test_predictions_ridge)^2)
 ```
 
 ```{r}
-cat("Training Error (Ridge):", mse_train_ridge, "\n")
-```
-
-```{r}
-cat("Test Error (Ridge):", mse_test_ridge, "\n")
+cat(paste(
+  "Training Error (Ridge):", mse_train_ridge, "\n",
+  "Test Error (Ridge):", mse_test_ridge, "\n"))
 ```
 
 The cross-validation process identifies the optimal \(\lambda\) by splitting the dataset into 10 folds and measuring the model's performance on different subsets. This approach tends to balance bias and variance by repeatedly testing the model on different parts of the data. The result showed an optimal \(\lambda\) of 0.01 with a corresponding training error (MSE) of 1.377282 and a test error of 1.554029. These errors indicate that the model performs well on both the training and test sets, demonstrating low variance and good generalization.
@@ -411,8 +411,9 @@ pred_gam_test_1 <- predict(gam_model_1, newdata = testData)
 mse_train_gam_1 <- mean((y_train - pred_gam_train_1)^2)
 mse_test_gam_1 <- mean((y_test - pred_gam_test_1)^2)
 
-cat("Training Error (GAM - k=1):","\t",mse_train_gam_1, "\n")
-cat("Test Error (GAM - k=1):","\t",mse_test_gam_1, "\n")
+cat(paste(
+  "Training Error (GAM - k=1):","\t",mse_train_gam_1, "\n",
+  "Test Error (GAM - k=1):","\t",mse_test_gam_1, "\n"))
 ```
 
 ```{r}
@@ -427,8 +428,9 @@ pred_gam_test_2 <- predict(gam_model_2, newdata = testData)
 mse_train_gam_2 <- mean((y_train - pred_gam_train_2)^2)
 mse_test_gam_2 <- mean((y_test - pred_gam_test_2)^2)
 
-cat("Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n")
-cat("Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n")
+cat(paste(
+  "Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n",
+  "Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n"))
 ```
 The first model (`gam_model_1`) is specified with \( k = 1 \), indicating a lower complexity where each smooth term is linear. The second model (`gam_model_2`) is specified with \( k = 6 \) (higher value for the model due to unique values for each variable), allowing for more flexibility and complexity in the smooth terms.
 
@@ -436,7 +438,9 @@ gam_model_2 has a lower training error, its increased complexity results in high
 
 ## Regression Tree Model with Cost-Complexity Pruning
 
-```{r}
+Now, we utilize a regression tree model to predict the response variable based. For regression tasks, the ANOVA split is employed, where splits are made to minimize the variance within nodes, effectively partitioning the data into homogeneous subsets. Regression trees operate by recursively splitting the data along the most significant feature at each node, creating a model that makes piecewise constant predictions for the response variable. While decision trees are highly flexible and can capture complex interactions in the data, they are prone to overfitting, particularly when the tree grows too deep. To mitigate this, pruning or controlling the complexity of the tree with a complexity parameter (CP) is often applied, which helps prevent overfitting by stopping splits that provide minimal improvement. Here, we implement a regression tree using the rpart library and assess the model’s performance by comparing the Mean Squared Error (MSE) on both training and test datasets.
+
+```{r, echo=FALSE}
 library(rpart)
 library(rpart.plot)
 
@@ -447,17 +451,22 @@ test_predictions_tree1 <- predict(tree_model, newdata = testData)
 
 mse_train_tree1 <- mean((trainData$LC50 - train_predictions_tree1)^2)
 mse_test_tree1 <- mean((testData$LC50 - test_predictions_tree1)^2)
-
+```
+The complexity parameter (CP) table presented in the output illustrates the impact of increasing tree complexity by adding splits. The root node error serves as the baseline error when no splits are made. As splits are introduced, the relative error decreases, with the corresponding cross-validated error (xerror) reflecting how well the model is expected to generalize to unseen data.
+```{r}
 printcp(tree_model)
 ```
-```{r}
-cat("Training Error (Tree):", mse_train_tree1, "\n")
-cat("Test Error (Tree):", mse_test_tree1, "\n")
-```
 
+```{r}
+cat(paste(
+  "Training Error (Tree):","\t", mse_train_tree1, "\n",
+  "Test Error (Tree):","\t", mse_test_tree1, "\n"))
+```
+The decision tree model achieved a training error of 1.0075 and a test error of 2.0532, indicating that while the model fits the training data relatively well, it exhibits poor generalization on the test data. This could be due to potential overfitting, where the model captures noise or spurious relationships within the training data that do not generalize well to new data.
+In comparison to previously explored models, such as the Generalized Additive Model (GAM) with k=1, which demonstrated better test error performance, the decision tree's higher test error means that further tuning, such as pruning or adjusting the complexity parameter, may be necessary to improve its predictive performance on unseen data.
 ```{r, echo=FALSE}
 rpart.plot(tree_model, 
-           main = "Customized Regression Tree for LC50",
+           main = "Regression Tree (LC50)",
            type = 3,
            fallen.leaves = TRUE,
            box.palette = "RdYlGn",
@@ -467,8 +476,8 @@ rpart.plot(tree_model,
            split.lty = 3,
 )
 ```
-
-```{r}
+In this updated approach, we prune the previously trained decision tree to enhance its generalization by reducing model complexity.The optimal complexity parameter (CP) is selected from the tree's complexity table based on the lowest cross-validated error (xerror), ensuring an appropriate balance between model complexity and prediction accuracy. Using this optimal CP value, we apply the prune function to simplify the tree by reducing the number of splits. The results show a training error of 1.2839 and a test error of 2.0162, compared to the unpruned tree’s training error of 1.0075 and test error of 2.0532. As expected, the training error increased after pruning because the model is now less complex and less tailored to the training data. However, the test error has decreased slightly, indicating a small improvement in the model’s ability to generalize to new data. While the improvement in test error is small, this process is crucial for producing a model that generalizes better without losing too much predictive power. In comparison to the unpruned tree, the pruned version provides a more balanced model by maintaining reasonable predictive performance while preventing overfitting, making it a valuable step in building robust machine learning models.
+```{r, echo=FALSE}
 optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
 
 pruned_tree <- prune(tree_model, cp = optimal_cp)
@@ -477,17 +486,20 @@ test_predictions_tree <- predict(pruned_tree, newdata = testData)
 
 mse_train_tree <- mean((trainData$LC50 - train_predictions_tree)^2)
 mse_test_tree <- mean((testData$LC50 - test_predictions_tree)^2)
+```
 
+```{r}
 printcp(pruned_tree)
 ```
+
 ```{r}
-cat("Training Error (Tree):", mse_train_tree, "\n")
-cat("Test Error (Tree):", mse_test_tree, "\n")
+cat(paste("Training Error (Tree Pruned):","\t", mse_train_tree, "\n",
+          "Test Error (Tree Pruned):","\t", mse_test_tree, "\n"))
 ```
 
 ```{r, echo=FALSE}
 rpart.plot(pruned_tree, 
-           main = "Pruned Regression Tree for LC50",
+           main = "Pruned Regression Tree (LC50)",
            type = 3,
            fallen.leaves = TRUE,
            box.palette = "RdYlGn",
@@ -500,7 +512,7 @@ rpart.plot(pruned_tree,
 
 ## Comparative Analysis of Regression Models
 
-### Training and Test Error Assessment for Various Models
+In the final part of our first chapter, we compared the performance of all models we studied. The Mean Squared Error (MSE) for both training and test datasets was calculated for each model, and the results were plotted in the graph above. The plot clearly shows the trade-off between model complexity and generalization. Models like GAM and Linear Regression exhibit a balance between training and test error, whereas the Decision Tree shows a significant increase in test error, indicating overfitting despite its lower training error. Ridge Regression, on the other hand, strikes a balance with relatively low test error compared to other models, suggesting that regularization helped in avoiding overfitting while maintaining good performance.
 
 ```{r, echo=FALSE}
 library(tidyr)
@@ -517,7 +529,9 @@ model_comparison_long <- pivot_longer(model_comparison,
                                       cols = c("Training_Error", "Test_Error"), 
                                       names_to = "Error_Type", 
                                       values_to = "MSE")
+```
 
+```{r, echo=FALSE, results='hide', fig.show='hide'}
 # Plot
 ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
@@ -532,7 +546,7 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
         text = element_text(size = 10))
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='hide', fig.show='hide'}
 ggplot(model_comparison_long, aes(x = Model, y = MSE,
                                   color = Error_Type, group = Error_Type)) +
   geom_line(size = 0.9) +
@@ -546,41 +560,65 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE,
         plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
+```{r, echo=FALSE}
+ggplot(model_comparison_long, aes(x = Model, y = MSE, 
+                                  color = Error_Type, group = Error_Type)) +
+  geom_line(size = 0.9) +
+  geom_point(size = 3, shape = 21, fill = "white") +
+  geom_text(aes(label = round(MSE, 2)), 
+            position = position_dodge(width = 0.5), 
+            vjust = -0.5, size = 3) +
+  labs(title = "Comparison of Training and Test Errors across Models",
+       x = "Model",
+       y = "Mean Squared Error (MSE)",
+       color = "Error Type") +
+  scale_color_brewer(palette = "Set1") +
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 12),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 10)) +
+  ylim(min(model_comparison_long$MSE) - 0.1, max(model_comparison_long$MSE) + 0.1)
+```
+From this comparison, we can conclude that Ridge Regression offers the best overall performance in terms of balancing training and test errors. The Decision Tree, while effective in minimizing training error, suffers from poor generalization on unseen data, as reflected by the highest test error.
 
 # Classification Model Comparison for Diabetes Prediction
 
-## k-NN Classification and Cross-Validation Comparison
+Now in this second chapter, we use the Pima Indians Diabetes Database, a widely recognized dataset for testing and evaluating classification models. The dataset contains information on 768 women from the Pima Indian population, a group known to have a high predisposition to diabetes. The primary goal is to predict whether a woman has developed diabetes based on a set of eight numeric features. The response variable, diabetes, is binary, indicating the presence (pos) or absence (neg) of the disease. The features include medical and physiological factors such as the number of pregnancies (pregnant), plasma glucose concentration (glucose), diastolic blood pressure (pressure), triceps skin fold thickness (triceps), 2-hour serum insulin levels (insulin), body mass index (mass), diabetes pedigree function (pedigree), and age (age).
 
-```{r}
+```{r, echo=FALSE}
 library(mlbench)
 data(PimaIndiansDiabetes2)
 df <- PimaIndiansDiabetes2
-head(df)
+na_count <- sapply(df, function(x) sum(is.na(x)))
 ```
 
 ```{r}
-na_count <- sapply(df, function(x) sum(is.na(x)))
+summary(df)
+```
+
+```{r}
 print(na_count)
 ```
+The first thing that we do is look at the NA's values. We address this problem by employing a k-Nearest Neighbors (kNN) imputation method. Missing data can lead to biased model results and reduced predictive performance, so handling these gaps appropriately is crucial. We observe that several features, such as glucose, pressure, triceps, insulin, and mass, contain missing values, as indicated by the na_count summary. The kNN imputation approach is implemented to estimate and fill these missing values.
 
 ```{r}
 # KNN imputation
-
 library(mlbench)
 library(VIM)
 
 df_imp <- kNN(df, k = 5)
 df_imp <- df_imp[, 1:9]
 df_imp$diabetes <- as.factor(df_imp$diabetes)
-head(df_imp)
-```
-
-```{r}
 na_count_df_imp <- sapply(df_imp, function(x) sum(is.na(x)))
 print(na_count_df_imp)
 ```
+kNN imputation is a popular non-parametric method for handling missing data. The idea behind kNN imputation is to use the nearest data points to estimate missing values by leveraging the similarity between observations in the dataset. The underlying assumption is that similar instances will have similar values for the missing features. In a typical kNN algorithm, the distance between data points is calculated based on the non-missing features. Once the k-nearest neighbors (with the closest distance) to a given data point are identified, the missing values are imputed based on some aggregation (e.g., mean, median, or mode) of the nearest neighbors' corresponding values.
 
-```{r}
+## k-NN Classification and Cross-Validation Comparison
+```{r, echo=FALSE}
 library(caret)
 set.seed(2024)
 trainIndex <- createDataPartition(df_imp$diabetes, 
@@ -595,11 +633,11 @@ trainData$diabetes <- ifelse(trainData$diabetes == "pos", 1, 0)
 testData$diabetes <- ifelse(testData$diabetes == "pos", 1, 0)
 trainData$diabetes <- as.factor(trainData$diabetes)
 testData$diabetes <- as.factor(testData$diabetes)
-
-head(trainData)
 ```
 
-```{r}
+To evaluate the performance of the k-Nearest Neighbors (k-NN) classifier on the diabetes dataset, we conducted a systematic investigation into the optimal number of neighbors, k, by employing both 5-fold cross-validation and leave-one-out cross-validation (LOOCV). The analysis involved calculating the error rates across a range of k values (from 1 to 25), allowing us to assess how the choice of k influences model accuracy.
+
+```{r, echo=FALSE}
 library(class)
 library(mlbench)
 # Function: cross-validated k-NN errors
@@ -609,8 +647,8 @@ cv_knn_errors <- function(data, k_values, cv_type) {
         k <- k_values[i]
         if (cv_type == "LOOCV") {
             control <- trainControl(method = "LOOCV")
-        } else if (cv_type == "10-fold") {
-            control <- trainControl(method = "cv", number = 10)
+        } else if (cv_type == "5-fold") {
+            control <- trainControl(method = "cv", number = 5)
         }
         
         model <- train(diabetes ~ ., data = data, method = "knn",
@@ -624,7 +662,7 @@ cv_knn_errors <- function(data, k_values, cv_type) {
 k_values <- 1:25
 
 # 5 fold
-errors_10fold <- cv_knn_errors(df_imp, k_values, "10-fold")
+errors_5fold <- cv_knn_errors(df_imp, k_values, "5-fold")
 
 # LOOCV
 errors_loocv <- cv_knn_errors(df_imp, k_values, "LOOCV")
@@ -642,14 +680,24 @@ for (i in seq_along(k_values)) {
                        cl = trainData$diabetes, k = k)
     test_errors[i] <- mean(predictions != testData$diabetes)
 }
+optimal_k_5fold <- k_values[which.min(errors_5fold)]
+optimal_k_loocv <- k_values[which.min(errors_loocv)]
+optimal_k_test <- k_values[which.min(test_errors)]
 ```
 
 ```{r}
+cat(paste("Optimal k from 5-fold CV:", optimal_k_5fold, "\n",
+          "Optimal k from LOOCV:", optimal_k_loocv, "\n",
+          "Optimal k from Test Errors:", optimal_k_test, "\n"))
+```
+The optimal k determined through 5-fold cross-validation was 6, while both leave-one-out cross-validation (LOOCV) and test errors indicated an optimal k of 3. These findings suggest that while a slightly larger neighborhood can enhance accuracy in cross-validation settings, the model may perform best with a smaller k when generalizing to unseen data. This discrepancy underscores the inherent trade-offs between bias and variance in model selection, as a lower k can lead to greater sensitivity to noise in the training data, potentially improving predictive performance on test datasets.
+
+```{r, echo=FALSE}
 # Create a data frame for plotting
 error_data <- data.frame(
     k = k_values,
     LOOCV_Error = errors_loocv,
-    Fold10_Error = errors_10fold,
+    Fold5_Error = errors_5fold,
     Test_Error = test_errors
 )
 
@@ -670,6 +718,21 @@ ggplot(error_data_long, aes(x = k, y = value, color = variable)) +
           panel.grid = element_blank(),
           plot.title = element_text(hjust = 0.5),
           text = element_text(size = 10))
+```
+```{r}
+k_value <- 3
+predictions <- knn(train = trainData[,-ncol(trainData)], 
+                   test = testData[,-ncol(testData)],
+                   cl = trainData$diabetes, 
+                   k = k_value)
+
+confusion_matrix <- table(testData$diabetes, predictions)
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+print(confusion_matrix)
+```
+
+```{r}
+cat("Accuracy of k-NN with k =", k_value, ":", accuracy, "\n")
 ```
 
 ## Generalized Additive Model for Diabetes Prediction
