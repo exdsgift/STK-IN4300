@@ -2,9 +2,9 @@
 title: "Regression and Classification: A Comprehensive Analysis"
 author: "Gabriele Durante"
 output:
-  html_document:
-  df_print: paged
   pdf_document: default
+  df_print: paged
+  html_document:
 university: "University of Oslo"
 course: "STK-IN4300: Statistical Learning Methods in Data Science"
 ---
@@ -210,7 +210,10 @@ The graph presents a density plot comparing the test error distributions for the
 
 ## Variable Selection Methods in Linear Regression
 
-```{r Backward Elimination}
+In this section we will look at model selection, which involves evaluating a trade-off between the goodness of fit of the model, which reflects the ability to fit the observed data, and the complexity of the model, which refers to the number of parameters used. To do this, various model selection criteria have been developed to guide the choice of parsimonious models that offer good generalization. Two of these widely used criteria are the Akaike Information Criterion (AIC) and the Bayesian Information Criterion (BIC). The AIC estimates the loss of information when a candidate model is used to represent the real data generation process, aiming to minimize this loss. On the other hand, the BIC is derived from a Bayesian perspective and approaches model selection as choosing the model with the highest posterior probability given the observed data. Both the AIC and BIC take into consideration the goodness of fit of the model and penalize model complexity, although the BIC imposes a stricter penalty for complexity, favoring simpler models than the AIC. The Forward Selection method starts with a model containing only one intercept and iteratively adds variables one at a time, selecting at each step the variable that leads to the maximum reduction in AIC or BIC. In contrast, the Backward method starts with a complete model and iteratively removes variables that contribute less significantly to the model, evaluated again by the AIC or BIC. Both the Stepwise and Backward methods provide systematic strategies for model selection, guided by the goal of finding a model that balances goodness of fit and complexity as quantified by the AIC or BIC.
+
+
+```{r Backward Elimination AIC BIC, echo=FALSE}
 library(MASS)
 library(leaps)
 
@@ -218,43 +221,62 @@ library(leaps)
 full_model <- lm(LC50 ~ ., data = trainData)
 backward_aic <- stepAIC(full_model, direction = "backward",
                         k = 2, trace = FALSE)
-summary(backward_aic)
+
 backward_bic <- stepAIC(full_model, direction = "backward",
                         k = log(nrow(trainData)), trace = FALSE)
+```
+
+```{r Backword AIC}
+summary(backward_aic)
+```
+
+```{r Backword BIC}
 summary(backward_bic)
 ```
 
-```{r Forward Selection}
+```{r Forward Selection AIC BIC, echo=FALSE}
 # Forward Selection
 null_model <- lm(LC50 ~ 1, data = trainData)
 forward_aic <- stepAIC(null_model, direction = "forward",
                        scope = formula(full_model), k = 2, trace = FALSE)
-summary(forward_aic)
+
 forward_bic <- stepAIC(null_model, direction = "forward",
-                       scope = formula(full_model), k = log(nrow(trainData)), trace = FALSE)
+                       scope = formula(full_model), k = log(nrow(trainData)),
+                       trace = FALSE)
+```
+
+```{r Forward AIC}
+summary(forward_aic)
+```
+
+```{r Forward BIC}
 summary(forward_bic)
 ```
 
-```{r Compare Models}
+```{r Compare Models, results='asis'}
 # Compare Models
-cat("Backward Elimination (AIC) Model:\n")
 print(backward_aic$call)
-cat("\nBackward Elimination (BIC) Model:\n")
 print(backward_bic$call)
-cat("\nForward Selection (AIC) Model:\n")
 print(forward_aic$call)
-cat("\nForward Selection (BIC) Model:\n")
 print(forward_bic$call)
-
-# Model Comparisons
-cat("\nModels Summary Comparison:\n")
-cat("AIC Backward:", AIC(backward_aic), "\n")
-cat("AIC Forward:", AIC(forward_aic), "\n")
-cat("BIC Backward:", BIC(backward_bic), "\n")
-cat("BIC Forward:", BIC(forward_bic), "\n")
 ```
 
+```{r}
+# Model Comparisons
+cat(paste(
+  "AIC Backward:", AIC(backward_aic), "\n",
+  "AIC Forward:", AIC(forward_aic), "\n",
+  "BIC Backward:", BIC(backward_bic), "\n",
+  "BIC Forward:", BIC(forward_bic), "\n"
+))
+```
+Both the AIC and BIC values are identical between the forward and backward procedures, suggesting that the model selection methods converge on the same models based on the respective criterion. The AIC favors slightly more complex models by retaining RDCHI, while the BIC prefers more parsimonious models by excluding it.
+
 ## Ridge Regression Model Optimization
+
+n this section, we apply Ridge regression to predict the target variable and utilize two methods: cross-validation and bootstrapping to determine the optimal regularization parameter \(\lambda\). We are doing this because Ridge regression is particularly useful in reducing model complexity and handling multicollinearity by penalizing large coefficients and could improve our current situation. We explore a grid of \(\lambda\) values and contrast the outcomes of the two methods, each aimed at finding the best balance between bias and variance.
+
+The cross-validation method used is 10-fold and the bootstrap procedure resample the training data 100 times. Both techniques are applied to a manually chosen grid of candidate \(\lambda\) values ranging from \(10^3\) to \(10^{-2}\).
 
 ```{r}
 library(glmnet)
@@ -275,23 +297,36 @@ lambda_grid <- 10^seq(3, -2, lenght = 100)
 cv_ridge <- cv.glmnet(X_train, y_train, alpha = 0,
                       lambda = lambda_grid, nfolds = 10)
 optimal_lambda_cv <- cv_ridge$lambda.min
+```
 
+```{r, echo=FALSE, results='asis'}
 cat("Optimal lambda from Cross-Validation:", optimal_lambda_cv, "\n")
-
-ridge_model <- glmnet(X_train, y_train, alpha = 0,
-                      lambda = optimal_lambda_cv)
-train_predictions_ridge <- predict(ridge_model, newx = X_train)
-test_predictions_ridge <- predict(ridge_model, newx = X_test)
-mse_train_ridge <- mean((y_train - train_predictions_ridge)^2)
-mse_test_ridge <- mean((y_test - test_predictions_ridge)^2)
-cat("Training Error (Ridge):", mse_train_ridge, "\n")
-cat("Test Error (Ridge):", mse_test_ridge, "\n")
 ```
 
 ```{r}
+ridge_model <- glmnet(X_train, y_train, alpha = 0,
+                      lambda = optimal_lambda_cv)
+
+train_predictions_ridge <- predict(ridge_model, newx = X_train)
+test_predictions_ridge <- predict(ridge_model, newx = X_test)
+
+mse_train_ridge <- mean((y_train - train_predictions_ridge)^2)
+mse_test_ridge <- mean((y_test - test_predictions_ridge)^2)
+```
+
+```{r}
+cat("Training Error (Ridge):", mse_train_ridge, "\n")
+```
+
+```{r}
+cat("Test Error (Ridge):", mse_test_ridge, "\n")
+```
+
+The cross-validation process identifies the optimal \(\lambda\) by splitting the dataset into 10 folds and measuring the model's performance on different subsets. This approach tends to balance bias and variance by repeatedly testing the model on different parts of the data. The result showed an optimal \(\lambda\) of 0.01 with a corresponding training error (MSE) of 1.377282 and a test error of 1.554029. These errors indicate that the model performs well on both the training and test sets, demonstrating low variance and good generalization.
+```{r}
 # Ridge regression (bootstrap)
 bootstrap_mse <- function(data, indices, lambda) {
-  # Create bootstrap sample
+  # Create sample
   bootstrap_sample <- data[indices, ]
   X_bootstrap <- as.matrix(bootstrap_sample[, -ncol(bootstrap_sample)])
   y_bootstrap <- bootstrap_sample$LC50
@@ -307,12 +342,15 @@ bootstrap_results <- sapply(lambda_grid, function(lambda) {
                                     lambda = lambda)$t)
   return(mean(mse_values))
 })
+```
+
+```{r}
 # Optimal Lambda from Bootstrap
 optimal_lambda_bootstrap <- lambda_grid[which.min(bootstrap_results)]
 cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 ```
-
-```{r}
+The bootstrap method resamples the dataset 100 times to evaluate the stability of the model and its performance under various random samples. The key advantage of this approach is that it generates different training datasets to capture variability. The bootstrap results across multiple \(\lambda\) values yielded an optimal \(\lambda\) of 0.1.
+```{r, echo=FALSE}
 results_df <- data.frame(
   Lambda = lambda_grid,
   CV_MSE = sapply(lambda_grid,
@@ -334,14 +372,20 @@ ggplot(results_df, aes(x = log10(Lambda)) ) +
         plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
+The results of the two methods are contrasted using a plot, where the MSE curves are plotted against \(\log_{10}(\lambda)\). Both curves exhibit a similar trend, showing a U-shape where error decreases initially with decreasing \(\lambda\) (left-hand side of the plot) before rising as \(\lambda\) increases.
+
+The optimal \(\lambda\) for cross-validation is slightly lower (\(\log_{10}(\lambda) = -2\)) compared to that of bootstrap (\(\log_{10}(\lambda) = -1\)). The Cross-Validation method may prefer a model with more regularization compared to Bootstrap, which tends to allow slightly more complexity (i.e., a higher \(\lambda\)). So in this case, Cross-Validation seems to provide a more stable and slightly better performance estimate, as shown by the lower MSE values.
 
 ## Non-linear Modeling Using Generalized Additive Models
+
+Generalized Additive Models (GAMs) offer a useful compromise between linear models and fully non-parametric models. They allow fitting a non-linear function \( f_j \) to each \( X_j \), enabling the automatic modeling of non-linear relationships that standard linear regression would not detect. Since the model is additive, we can still examine the effect of each \( X_j \) on \( Y \) individually, keeping all other variables fixed. The smoothness of the function \( f_j \) for the variable \( X_j \) can be summarized by the degrees of freedom. The main limitation of GAMs is that the model is constrained to be additive. With many variables, it is possible to miss important interactions. However, as with linear regression, we can manually add interaction terms to the GAM model by including additional predictors in the form of \( X_j \times X_k \). We can also add low-dimensional interaction functions in the form of \( f_{jk}(X_j, X_k) \) to the model. Such terms can be fitted using two-dimensional smoothers, such as local regression or two-dimensional splines.
+
 
 ```{r}
 sapply(trainData, function(x) length(unique(x)))
 ```
 
-```{r}
+```{r, echo=FALSE}
 library(mgcv)
 
 set.seed(2024)
@@ -353,7 +397,9 @@ X_train <- as.matrix(trainData[, -ncol(trainData)])
 y_train <- trainData$LC50
 X_test <- as.matrix(testData[, -ncol(testData)])
 y_test <- testData$LC50
+```
 
+```{r}
 # GAM less complexity (k = -1)
 k = 1
 gam_model_1 <- gam(LC50 ~ s(TPSA, k=k) + s(SAacc, k=k) + s(H050, k=k) + 
@@ -367,7 +413,9 @@ mse_test_gam_1 <- mean((y_test - pred_gam_test_1)^2)
 
 cat("Training Error (GAM - k=1):","\t",mse_train_gam_1, "\n")
 cat("Test Error (GAM - k=1):","\t",mse_test_gam_1, "\n")
+```
 
+```{r}
 # GAM more complexity (k = 6)
 k = 6
 gam_model_2 <- gam(LC50 ~ s(TPSA, k=k) + s(SAacc, k=k) + s(H050, k=k) + 
@@ -382,6 +430,9 @@ mse_test_gam_2 <- mean((y_test - pred_gam_test_2)^2)
 cat("Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n")
 cat("Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n")
 ```
+The first model (`gam_model_1`) is specified with \( k = 1 \), indicating a lower complexity where each smooth term is linear. The second model (`gam_model_2`) is specified with \( k = 6 \) (higher value for the model due to unique values for each variable), allowing for more flexibility and complexity in the smooth terms.
+
+gam_model_2 has a lower training error, its increased complexity results in higher test error compared to gam_model_1. Therefore, despite gam_model_1's higher test error, it may be preferable due to its generalization capability.
 
 ## Regression Tree Model with Cost-Complexity Pruning
 
@@ -398,11 +449,13 @@ mse_train_tree1 <- mean((trainData$LC50 - train_predictions_tree1)^2)
 mse_test_tree1 <- mean((testData$LC50 - test_predictions_tree1)^2)
 
 printcp(tree_model)
+```
+```{r}
 cat("Training Error (Tree):", mse_train_tree1, "\n")
 cat("Test Error (Tree):", mse_test_tree1, "\n")
 ```
 
-```{r}
+```{r, echo=FALSE}
 rpart.plot(tree_model, 
            main = "Customized Regression Tree for LC50",
            type = 3,
@@ -425,6 +478,14 @@ test_predictions_tree <- predict(pruned_tree, newdata = testData)
 mse_train_tree <- mean((trainData$LC50 - train_predictions_tree)^2)
 mse_test_tree <- mean((testData$LC50 - test_predictions_tree)^2)
 
+printcp(pruned_tree)
+```
+```{r}
+cat("Training Error (Tree):", mse_train_tree, "\n")
+cat("Test Error (Tree):", mse_test_tree, "\n")
+```
+
+```{r, echo=FALSE}
 rpart.plot(pruned_tree, 
            main = "Pruned Regression Tree for LC50",
            type = 3,
@@ -437,17 +498,11 @@ rpart.plot(pruned_tree,
 )
 ```
 
-```{r}
-printcp(pruned_tree)
-cat("Training Error (Tree):", mse_train_tree, "\n")
-cat("Test Error (Tree):", mse_test_tree, "\n")
-```
-
 ## Comparative Analysis of Regression Models
 
 ### Training and Test Error Assessment for Various Models
 
-```{r}
+```{r, echo=FALSE}
 library(tidyr)
 
 model_comparison <- data.frame(
@@ -477,7 +532,7 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
         text = element_text(size = 10))
 ```
 
-```{r}
+```{r, echo=FALSE}
 ggplot(model_comparison_long, aes(x = Model, y = MSE,
                                   color = Error_Type, group = Error_Type)) +
   geom_line(size = 0.9) +
