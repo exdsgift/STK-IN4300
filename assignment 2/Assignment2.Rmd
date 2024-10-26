@@ -2,9 +2,9 @@
 title: "Regression and Classification: A Comprehensive Analysis"
 author: "Gabriele Durante"
 output:
-  pdf_document: default
-  df_print: paged
   html_document:
+  df_print: paged
+  pdf_document: default
 university: "University of Oslo"
 course: "STK-IN4300: Statistical Learning Methods in Data Science"
 ---
@@ -719,6 +719,7 @@ ggplot(error_data_long, aes(x = k, y = value, color = variable)) +
           plot.title = element_text(hjust = 0.5),
           text = element_text(size = 10))
 ```
+The blue test error line shows noticeable variability across different kk values, indicating that the model's ability to generalize decreases as k increases. Both LOOCV and 5-fold cross-validation errors remain relatively stable. These cross-validation methods offer consistent error estimates regardless of small changes in k. The optimal k for the test error seems to be around k=3, where the test error reaches its minimum, and both cross-validation errors align closely, validating this selection.
 ```{r}
 k_value <- 3
 predictions <- knn(train = trainData[,-ncol(trainData)], 
@@ -734,10 +735,15 @@ print(confusion_matrix)
 ```{r}
 cat("Accuracy of k-NN with k =", k_value, ":", accuracy, "\n")
 ```
+The confusion matrix for k=3 shows that the model correctly classified 129 negative cases and 63 positive cases, but misclassified 25 positive cases as negative and 36 negative cases as positive. This leads to an overall accuracy of 75.89%.
 
 ## Generalized Additive Model for Diabetes Prediction
 
-```{r}
+In this section, we look again at Generalized Additive Model (GAM) but now using splines and applying variable selection to identify the best model. GAMs allow for flexible modeling by applying smooth functions (splines) to predictor variables, capturing non-linear relationships without requiring specific parametric forms.
+
+We first fit a GAM using smooth functions `s()` on each predictor in the diabetes dataset. The response variable, diabetes, is binary, so we use the binomial family with the logit link function.
+
+```{r, echo=FALSE}
 library(caret)
 library(mgcv)
 library(dplyr)
@@ -747,24 +753,52 @@ library(broom)
 gam_model <- gam(diabetes ~ s(pregnant) + s(glucose) + s(pressure) + 
                  s(triceps) + s(insulin) + s(mass) + 
                  s(pedigree) + s(age), data = trainData, family = binomial)
+
+pred_probs <- predict(gam_model, newdata = testData, type = "response")
+pred_class <- ifelse(pred_probs > 0.5, "pos", "neg") # Threshold at 0.5
+
+# Confusion Matrix
+conf_matrix <- confusionMatrix(as.factor(pred_class), testData$diabetes, positive = "pos")
+
+```
+
+```{r}
 summary(gam_model)
 ```
 
 ```{r}
-# library(MASS)
-# # full model
-# full_model <- gam(diabetes ~ s(pregnant) + s(glucose) + s(pressure) + 
-#                    s(triceps) + s(insulin) + s(mass) + 
-#                    s(pedigree) + s(age), 
-#                    data = trainData, family = binomial)
-# # stepwise AIC
-# selected_model <- step(full_model, direction = "backward")
-# summary(selected_model)
+print(conf_matrix)
 ```
+To find the best model, we can gradually remove less significant predictors based on their p-values from the summary of the GAM. This process reduces the model complexity while retaining important variables. The second GAM model removes less significant predictors `pregnant, pressure, triceps` and keeps the most relevant ones `glucose, insulin, mass, pedigree, age`, based on their smooth term significance.
+
+```{r, echo=FALSE}
+gam_model2 <- gam(diabetes ~ s(glucose) + s(insulin) + s(mass) + 
+                 s(pedigree) + s(age), data = trainData, family = binomial)
+
+# Make predictions on the test set
+pred_probs <- predict(gam_model2, newdata = testData, type = "response")
+pred_class <- ifelse(pred_probs > 0.5, "pos", "neg") # Threshold at 0.5
+
+# Confusion Matrix
+conf_matrix <- confusionMatrix(as.factor(pred_class), testData$diabetes, positive = "pos")
+```
+
+```{r}
+summary(gam_model2)
+```
+
+```{r}
+print(conf_matrix)
+```
+The full model achieved an accuracy of 78.66%, with a sensitivity of 72.73% and a specificity of 81.82%. It correctly classified 135 non-diabetic cases and 63 diabetic cases, but misclassified 24 diabetic individuals as negative and 30 non-diabetic individuals as positive. The reduced model, which included only a subset of the original predictors, showed a slightly improved performance. It achieved an accuracy of 79.45%, with a sensitivity of 75.00% and a specificity of 81.82%. This model reduced the false negatives from 24 to 22, meaning it more effectively identified positive diabetes cases, while maintaining the same number of false positives (30).
 
 ## Tree-Based Methods for Diabetes Classification
 
-```{r Classification Tree}
+Now in this section, we fit three tree-based models: a classification tree, an ensemble of bagged trees and a random forest. The performance of these models is evaluated by comparing the training and test error rates.
+
+The classification tree model, which is a single decision tree, had a training error of 0.136 and a test error of 0.217. This result highlights that the model may have slightly overfitted the training data, as it performed better on the training set compared to the test set. The relatively higher test error means that the classification tree is more prone to overfitting compared to ensemble methods.
+
+```{r Classification Tree, echo=FALSE}
 library(rpart)
 library(ipred)
 library(randomForest)
@@ -778,12 +812,17 @@ tree_test_pred <- predict(classification_tree, testData, type = "class")
 # error
 tree_train_error <- mean(tree_train_pred != trainData$diabetes)
 tree_test_error <- mean(tree_test_pred != testData$diabetes)
-
-cat("Classification Tree Training Error:", tree_train_error, "\n")
-cat("Classification Tree Test Error:", tree_test_error, "\n")
 ```
 
-```{r Ensemble of Bagged Tree}
+```{r}
+cat(paste(
+  "Classification Tree Training Error:", tree_train_error,"\n",
+  "Classification Tree Test Error:", tree_test_error,"\n"))
+```
+The bagged trees model, which is an ensemble of multiple trees created by bootstrapping, exhibited an exceptionally low training error of 0.002, the model perfectly fit the training data. However, the test error was 0.237, showing a significant increase from the training error. This sharp contrast between training and test errors indicates that the bagged model might be overfitting, as it achieves almost perfect performance on the training data but struggles to generalize to unseen data.
+
+```{r Ensemble of Bagged Tree, echo=FALSE}
+set.seed(2024)
 bagged_trees <- bagging(diabetes ~ ., data = trainData)
 
 bagged_train_pred <- predict(bagged_trees, trainData)
@@ -792,13 +831,18 @@ bagged_test_pred <- predict(bagged_trees, testData)
 # error
 bagged_train_error <- mean(bagged_train_pred != trainData$diabetes)
 bagged_test_error <- mean(bagged_test_pred != testData$diabetes)
-
-cat("Bagged Trees Training Error:", bagged_train_error, "\n")
-cat("Bagged Trees Test Error:", bagged_test_error, "\n")
 ```
 
-```{r Random Forest}
+```{r}
+cat(paste(
+  "Bagged Trees Training Error:", bagged_train_error, "\n",
+  "Bagged Trees Test Error:", bagged_test_error, "\n"))
+```
+The random forest model, which is another ensemble method but adds randomness by selecting a subset of features at each split, had a training error of 0—again indicating perfect fit on the training data. The test error for the random forest model was 0.217, identical to that of the classification tree. Despite the zero training error, the random forest did not show a marked improvement in the test error, suggesting that while it captures patterns in the training data well, it may still struggle with generalization.
+
+```{r Random Forest, echo=FALSE}
 # Fit the random forest
+set.seed(2024)
 random_forest <- randomForest(diabetes ~ ., data = trainData)
 
 # Predict on training and test data
@@ -808,12 +852,26 @@ rf_test_pred <- predict(random_forest, testData)
 # Calculate training and test error
 rf_train_error <- mean(rf_train_pred != trainData$diabetes)
 rf_test_error <- mean(rf_test_pred != testData$diabetes)
-
-cat("Random Forest Training Error:", rf_train_error, "\n")
-cat("Random Forest Test Error:", rf_test_error, "\n")
 ```
 
-```{r Plot Comparison}
+```{r}
+cat(paste(
+  "Random Forest Training Error:", rf_train_error, "\n",
+  "Random Forest Test Error:", rf_test_error, "\n"))
+```
+```{r}
+rf_test_confusion <- table(Predicted = rf_test_pred, Actual = testData$diabetes)
+
+cat("\nTest Confusion Matrix:\n")
+print(rf_test_confusion)
+```
+```{r}
+cat(paste("Training Error:", rf_train_error, "\n",
+          "Test Error:", rf_test_error, "\n"))
+```
+
+
+```{r Plot Comparison, echo=FALSE}
 # Store the errors in a data frame
 results <- data.frame(
   Model = c("Classification Tree", "Bagged Trees", "Random Forest"),
@@ -841,12 +899,139 @@ ggplot(results_long, aes(x = Model, y = Error, fill = Error_Type)) +
         axis.title = element_text(),
         text = element_text(size = 10))
 ```
+The classification tree and random forest had the same test error of 0.217, while the bagged trees model showed the highest test error at 0.237. Both ensemble methods (bagged trees and random forest) achieved perfect or near-perfect performance on the training data, but their test error rates did not outperform the simpler classification tree. This suggests that although the ensemble methods reduce variance by averaging multiple trees, they do not necessarily improve generalization on this specific dataset.
 
 ## Neural Network Modeling for Diabetes Prediction
 
+Now as last model we look at Neural Networks. Here we perform a neural network where the number of neurons in the hidden layer is varied to study its effect on both training and test error rates. The sequence of neurons ranges from 1 to 100, and for each neuron count, a neural network is trained on scaled training data (trainData_scaled). The model is fitted with a maximum of 500 iterations, using logistic activation since it is a classification task. For each configuration, predictions are made on both the training and test sets, and classification errors are calculated. Once all models are trained, the optimal number of neurons is identified by selecting the configuration that minimizes the test error.
+
+```{r, echo=FALSE}
+set.seed(2024)
+trainIndex <- createDataPartition(df_imp$diabetes, 
+                                  p = 2/3, 
+                                  list = FALSE, 
+                                  times = 1)
+
+trainData <- df_imp[trainIndex, ]
+testData <- df_imp[-trainIndex, ]
+
+trainData$diabetes <- ifelse(trainData$diabetes == "pos", 1, 0)
+testData$diabetes <- ifelse(testData$diabetes == "pos", 1, 0)
+trainData$diabetes <- as.factor(trainData$diabetes)
+testData$diabetes <- as.factor(testData$diabetes)
+
+# Scale and center the data
+preProc <- preProcess(trainData[, -which(names(trainData) == "diabetes")], 
+                      method = c("center", "scale"))
+trainData_scaled <- predict(preProc, trainData)
+testData_scaled <- predict(preProc, testData)
+```
+
 ```{r}
+set.seed(2024)
+neurons <- seq(1, 100, by = 5)
+train_errors <- c()
+test_errors <- c()
+
+# Loop
+for (n in neurons) {
+  # Fit
+  nn_model <- nnet(diabetes ~ ., data = trainData_scaled,
+                   size = n, linout = FALSE, maxit = 500, trace = FALSE)
+  
+  # Train Pred
+  train_pred <- predict(nn_model, trainData_scaled)
+  train_pred_class <- ifelse(train_pred > 0.5, 1, 0)
+  train_error <- mean(train_pred_class != as.numeric(levels(
+    trainData_scaled$diabetes))[trainData_scaled$diabetes])
+  train_errors <- c(train_errors, train_error)
+  
+  # Test Pred
+  test_pred <- predict(nn_model, testData_scaled)
+  test_pred_class <- ifelse(test_pred > 0.5, 1, 0)
+  test_error <- mean(test_pred_class != as.numeric(levels(
+    testData_scaled$diabetes))[testData_scaled$diabetes])
+  test_errors <- c(test_errors, test_error)
+}
+```
+
+```{r, echo=FALSE, results='hide'}
+
+# Compile results
+error_results <- data.frame(
+  Neurons = neurons,
+  Training_Error = train_errors,
+  Test_Error = test_errors
+)
+
+# Print results
+print(error_results)
+```
+
+```{r}
+optimal_neurons <- neurons[which.min(test_errors)]
+cat("Optimal number of neurons:", optimal_neurons, "\n")
+```
+The graph illustrates the training and test error rates across different neuron configurations. The training error decreases quickly as the number of neurons increases, reaching zero around 25 neurons and staying flat at zero afterward. This indicates that the model is able to perfectly fit the training data beyond a certain complexity, a sign of potential overfitting. On the other hand, the test error initially decreases, suggesting that the model is generalizing well to the unseen data. However, after around 25 neurons, the test error begins to fluctuate and increase.
+```{r, echo=FALSE}
+library(ggplot2)
+error_results_long <- reshape2::melt(error_results,
+                                     id.vars = "Neurons", 
+                                     variable.name = "Error_Type", 
+                                     value.name = "Error")
+
+ggplot(error_results_long, aes(x = Neurons, y = Error,
+                               color = Error_Type)) +
+  geom_line(size = 0.7) +
+  labs(title = "Training and Test Errors for Neural Network",
+       x = "Number of Neurons",
+       y = "Error Rate") +
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5),
+        text = element_text(size = 10))
+```
+The behavior shown in the graph is a classic case of overfitting. The rapid decline in training error and the rising fluctuations in test error suggest that adding more neurons beyond a certain point results in a model that is too finely tuned to the training data, leading to poor generalization.
+
+```{r, echo=FALSE}
+# Initialize error lists
+train_errors <- c()
+test_errors <- c()
+predictions_51_neurons <- NULL
+
+# Train the model with 51 neurons
+n <- 1
+nn_model <- nnet(diabetes ~ ., data = trainData_scaled,
+                 size = n, linout = FALSE, maxit = 500, trace = FALSE)
+
+# Train Predictions
+train_pred <- predict(nn_model, trainData_scaled)
+train_pred_class <- ifelse(train_pred > 0.5, 1, 0)
+train_error <- mean(train_pred_class != as.numeric(as.character(trainData_scaled$diabetes)))
+train_errors <- c(train_errors, train_error)
+
+# Test Predictions
+test_pred <- predict(nn_model, testData_scaled)
+test_pred_class <- ifelse(test_pred > 0.5, 1, 0)
+test_error <- mean(test_pred_class != as.numeric(as.character(testData_scaled$diabetes)))
+test_errors <- c(test_errors, test_error)
+```
+The results from the confusion matrix, based on a model trained with 1 neuron, reveal that the model has a training error of 0.218 and a test error of 0.207. The confusion matrix shows a balanced accuracy of 0.7922 and a Kappa statistic of 0.5366 (moderate agreement between predicted and true labels). The model demonstrates high sensitivity (85.54%) but lower specificity (67.42%), basically it performs better at identifying non-diabetic cases than diabetic ones.
+```{r}
+cat(paste("Training Error for 1 neurons:", train_error, "\n",
+          "Test Error for 1 neurons:", test_error, "\n"))
+
+confusion <- confusionMatrix(as.factor(test_pred_class), testData$diabetes)
+print(confusion)
+```
+This case serves as a practical demonstration of the Universal Approximation Theorem, which asserts that a neural network with a sufficient number of neurons can approximate any continuous function. As seen in the experiment, the training error rapidly decreases as the number of neurons increases, reaching zero around 25 neurons, indicating that the network is able to perfectly capture the patterns in the training data. This supports the theorem's claim that a neural network, with enough capacity, can approximate complex decision boundaries. However, as the number of neurons continues to increase beyond this point, the test error begins to fluctuate and rise, which suggests overfitting. While the Universal Approximation Theorem guarantees that a network can model any function, it does not guarantee generalization. In this case, the network starts fitting not only the true patterns but also the noise in the training data, leading to worse performance on unseen data. Interestingly, the model with just one neuron provides the best test error, showing that simpler models often generalize better, as they avoid the risk of overfitting that comes with more complex networks.
+
+```{r, echo=FALSE, results='hide'}
 library(nnet)
 library(caret)
+
+set.seed(2024)
 
 neurons <- seq(1, 100, by = 5)
 
@@ -862,44 +1047,43 @@ for (n in neurons) {
   
   # Train
   train_pred <- predict(nn_model, trainData)
-  train_pred_class <- ifelse(train_pred > 0.5, 1, 0)  # Convert to binary
+  train_pred_class <- ifelse(train_pred > 0.5, 1, 0)
   train_error <- mean(train_pred_class != trainData$diabetes)
   train_errors <- c(train_errors, train_error)
   
   # Test
   test_pred <- predict(nn_model, testData)
-  test_pred_class <- ifelse(test_pred > 0.5, 1, 0)  # Convert to binary
+  test_pred_class <- ifelse(test_pred > 0.5, 1, 0)
   test_error <- mean(test_pred_class != testData$diabetes)
   test_errors <- c(test_errors, test_error)
 }
 
-# Results
 error_results <- data.frame(
   Neurons = neurons,
   Training_Error = train_errors,
   Test_Error = test_errors
 )
 print(error_results)
-
+```
+```{r, echo=FALSE, results='hide'}
 # Choose the optimal number of neurons based on test error
 optimal_neurons <- neurons[which.min(test_errors)]
 cat("Optimal number of neurons:", optimal_neurons, "\n")
-
 ```
 
-```{r}
+```{r, echo=FALSE, results='hide', fig.show='hide'}
 library(ggplot2)
 error_results_long <- reshape2::melt(error_results,
                                      id.vars = "Neurons", 
                                      variable.name = "Error_Type", 
                                      value.name = "Error")
 
-ggplot(error_results_long, aes(x = Neurons, y = log10(Error),
+ggplot(error_results_long, aes(x = Neurons, y = Error,
                                color = Error_Type)) +
   geom_line(size = 0.7) +
   labs(title = "Training and Test Errors for Neural Network",
        x = "Number of Neurons",
-       y = "log(Error Rate)") +
+       y = "Error Rate") +
   theme_light() +
   theme(legend.position = "bottom",
         panel.grid = element_blank(),
@@ -909,6 +1093,42 @@ ggplot(error_results_long, aes(x = Neurons, y = log10(Error),
 
 ## Comparing Classification Methods for Diabetes Analysis
 
-```{r}
+```{r, echo=FALSE}
+library(tidyr)
 
+model_comparison <- data.frame(
+  Model = c("k-NN Classification", "GAM", "Classification Tree", "Bagged Trees", "Random Forest", "Neural Network"),
+  Training_Error = c(error_train, error_train_dummy,
+                     mse_train_ridge, mse_train_gam_2, mse_train_tree),
+  Test_Error = c(error_test, error_test_dummy,
+                 mse_test_ridge, mse_test_gam_2, mse_test_tree)
+)
+
+model_comparison_long <- pivot_longer(model_comparison, 
+                                      cols = c("Training_Error", "Test_Error"), 
+                                      names_to = "Error_Type", 
+                                      values_to = "MSE")
+```
+
+```{r, echo=FALSE}
+ggplot(model_comparison_long, aes(x = Model, y = MSE, 
+                                  color = Error_Type, group = Error_Type)) +
+  geom_line(size = 0.9) +
+  geom_point(size = 3, shape = 21, fill = "white") +
+  geom_text(aes(label = round(MSE, 2)), 
+            position = position_dodge(width = 0.5), 
+            vjust = -0.5, size = 3) +
+  labs(title = "Comparison of Training and Test Errors across Models",
+       x = "Model",
+       y = "Mean Squared Error (MSE)",
+       color = "Error Type") +
+  scale_color_brewer(palette = "Set1") +
+  theme_light() +
+  theme(legend.position = "bottom",
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, size = 12),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        text = element_text(size = 10)) +
+  ylim(min(model_comparison_long$MSE) - 0.1, max(model_comparison_long$MSE) + 0.1)
 ```
