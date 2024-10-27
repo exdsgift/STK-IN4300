@@ -2,9 +2,9 @@
 title: "Regression and Classification: A Comprehensive Analysis"
 author: "Gabriele Durante"
 output:
-  html_document:
-  df_print: paged
   pdf_document: default
+  df_print: paged
+  html_document:
 university: "University of Oslo"
 course: "STK-IN4300: Statistical Learning Methods in Data Science"
 ---
@@ -38,7 +38,7 @@ colnames(data) <- c("TPSA", "SAacc", "H050",
 
 # Regression Model Comparison for Predicting Aquatic Toxicity
 
-In this study, we investigate the acute aquatic toxicity of various organic molecules, as quantified by the lethal concentration (LC50) that induces mortality in 50% of the planktonic crustacean Daphnia magna over a 48-hour exposure period. The objective is to develop predictive models that leverage molecular descriptors to ascertain the toxicity levels of these compounds. To this end, we utilize a dataset comprising 546 observations, which is sourced from the UCI Machine Learning Repository. The dataset encompasses eight key molecular descriptors identified as significant predictors of LC50:
+In this part, we investigate the acute aquatic toxicity of various organic molecules, as quantified by the lethal concentration (LC50) that induces mortality in 50% of the planktonic crustacean Daphnia magna over a 48-hour exposure period. The objective is to develop predictive models that leverage molecular descriptors to ascertain the toxicity levels of these compounds. To do this, we use a dataset comprising 546 observations, which is sourced from the UCI Machine Learning Repository. The dataset encompasses eight key molecular descriptors identified as significant predictors of LC50:
 
 -   TPSA: Topological Polar Surface Area, calculated via a contribution method considering the presence of nitrogen, oxygen, potassium, and sulfur.
 -   SAacc: Van der Waals Surface Area (VSA) of hydrogen bond acceptor atoms.
@@ -58,10 +58,10 @@ With a complete dataset comprising 546 observations, we can ensure that our mode
 
 ## Linear and Dummy Encoding Approach
 
-To evaluate the predictive models effectively, we partition the dataset into training and testing subsets. A random seed is set using `set.seed(2024)` to ensure reproducibility. The training set is constructed by sampling approximately two-thirds of the total observations with the command `index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))`. 
+To evaluate the predictive models effectively, we partition the dataset into training and testing subsets. A random seed is set using `set.seed(2024)` to ensure reproducibility. The training set is constructed by sampling approximately two-thirds of the total observations with the command `index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))`.
 
-- Training Data: `trainData <- data[index, ]` comprises the selected observations for model fitting.
-- Testing Data: `testData <- data[-index, ]` contains the remaining observations for model evaluation.
+-   Training Data: `trainData <- data[index, ]` comprises the selected observations for model fitting.
+-   Testing Data: `testData <- data[-index, ]` contains the remaining observations for model evaluation.
 
 ```{r Splitting, echo=TRUE}
 # build the dataset for the training
@@ -70,8 +70,11 @@ index <- sample(1:nrow(data), size = round(2/3 * nrow(data)))
 trainData <- data[index, ]
 testData <- data[-index, ]
 ```
+
 ### Linear Model
+
 First we fitted a linear regression model to predict LC50 using molecular descriptors from the training dataset. The model's performance is summarized as follows:
+
 ```{r Linear Model, echo=TRUE}
 set.seed(2024)
 ### Modeling Count Variables Directly as Linear Effects
@@ -93,7 +96,8 @@ cat(paste(
 ```{r summary Model 1}
 summary(model1)
 ```
-The R-squared value of 0.472 indicates that while the linear model captures some of the variability in the data, it leaves a considerable amount unexplained. Highly significant predictors, such as TPSA (p < 2e-16) and MLOGP (p < 3.83e-10), reveal strong relationships with LC50, indicating that increased topological polar surface area and greater lipophilicity correlate with higher toxicity levels. 
+
+The R-squared value of 0.472 indicates that while the linear model captures some of the variability in the data, it leaves a considerable amount unexplained. Highly significant predictors, such as TPSA (p \< 2e-16) and MLOGP (p \< 3.83e-10), reveal strong relationships with LC50, indicating that increased topological polar surface area and greater lipophilicity correlate with higher toxicity levels.
 
 ### Dummy Linear Model
 
@@ -130,9 +134,10 @@ cat(paste(
 ```{r}
 summary(model2)
 ```
+
 The training error for the dummy-encoded model is 1.424, while the test error is 1.617. Compared to the previous linear model, which yielded a training error of 1.377 and a test error of 1.557, this model exhibits slightly higher error rates on both the training and test datasets. This increase suggests that the dummy encoding may not have improved the model's predictive performance. This could indicate a potential loss of information due to the transformation of continuous variables into binary indicators, which could limit the model's ability to capture the nuances of the underlying relationships between predictors and the response variable.
 
-The overall model performance is reflected in the Multiple R-squared value of 0.454, while the adjusted R-squared of 0.4417 accounts for the number of predictors in the model. The F-statistic (36.9) with a p-value < 2.2e-16 indicates that the model is statistically significant.
+The overall model performance is reflected in the Multiple R-squared value of 0.454, while the adjusted R-squared of 0.4417 accounts for the number of predictors in the model. The F-statistic (36.9) with a p-value \< 2.2e-16 indicates that the model is statistically significant.
 
 ## Empirical Error Distribution Analysis in Regression Models
 
@@ -208,12 +213,12 @@ ggplot(results_df, aes(x = Error, fill = Model)) +
           plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
+
 The graph presents a density plot comparing the test error distributions for the two models. The aim should be illustrate the performance of the models on unseen data and their reliability, focusing on the variability and central tendency of their respective errors. The Linear Model exhibits a narrower distribution centered around a lower MSE compared to the Dummy Model, whose distribution appears wider and shifted slightly to the right, indicating higer average test error. Basically, the tigter distribution and lower mean MSE of the Linear Model suggest that it generalize better to the test set compared to the dummy model.
 
 ## Variable Selection Methods in Linear Regression
 
 In this section we will look at model selection, which involves evaluating a trade-off between the goodness of fit of the model, which reflects the ability to fit the observed data, and the complexity of the model, which refers to the number of parameters used. To do this, various model selection criteria have been developed to guide the choice of parsimonious models that offer good generalization. Two of these widely used criteria are the Akaike Information Criterion (AIC) and the Bayesian Information Criterion (BIC). The AIC estimates the loss of information when a candidate model is used to represent the real data generation process, aiming to minimize this loss. On the other hand, the BIC is derived from a Bayesian perspective and approaches model selection as choosing the model with the highest posterior probability given the observed data. Both the AIC and BIC take into consideration the goodness of fit of the model and penalize model complexity, although the BIC imposes a stricter penalty for complexity, favoring simpler models than the AIC. The Forward Selection method starts with a model containing only one intercept and iteratively adds variables one at a time, selecting at each step the variable that leads to the maximum reduction in AIC or BIC. In contrast, the Backward method starts with a complete model and iteratively removes variables that contribute less significantly to the model, evaluated again by the AIC or BIC. Both the Stepwise and Backward methods provide systematic strategies for model selection, guided by the goal of finding a model that balances goodness of fit and complexity as quantified by the AIC or BIC.
-
 
 ```{r Backward Elimination AIC BIC, echo=FALSE}
 library(MASS)
@@ -272,13 +277,14 @@ cat(paste(
   "BIC Forward:", BIC(forward_bic), "\n"
 ))
 ```
+
 Both the AIC and BIC values are identical between the forward and backward procedures, suggesting that the model selection methods converge on the same models based on the respective criterion. The AIC favors slightly more complex models by retaining RDCHI, while the BIC prefers more parsimonious models by excluding it.
 
 ## Ridge Regression Model Optimization
 
-n this section, we apply Ridge regression to predict the target variable and utilize two methods: cross-validation and bootstrapping to determine the optimal regularization parameter \(\lambda\). We are doing this because Ridge regression is particularly useful in reducing model complexity and handling multicollinearity by penalizing large coefficients and could improve our current situation. We explore a grid of \(\lambda\) values and contrast the outcomes of the two methods, each aimed at finding the best balance between bias and variance.
+Now we apply Ridge regression to predict the target variable and utilize two methods: cross-validation and bootstrapping to determine the optimal regularization parameter $\lambda$. We are doing this because Ridge regression is particularly useful in reducing model complexity and handling multicollinearity by penalizing large coefficients and could improve our current situation. We explore a grid of $\lambda$ values and contrast the outcomes of the two methods, each aimed at finding the best balance between bias and variance.
 
-The cross-validation method used is 10-fold and the bootstrap procedure resample the training data 100 times. Both techniques are applied to a manually chosen grid of candidate \(\lambda\) values ranging from \(10^3\) to \(10^{-2}\).
+The cross-validation method used is 10-fold and the bootstrap procedure resample the training data 100 times. Both techniques are applied to a manually chosen grid of candidate $\lambda$ values ranging from $10^3$ to $10^{-2}$.
 
 ```{r}
 library(glmnet)
@@ -322,7 +328,8 @@ cat(paste(
   "Test Error (Ridge):", mse_test_ridge, "\n"))
 ```
 
-The cross-validation process identifies the optimal \(\lambda\) by splitting the dataset into 10 folds and measuring the model's performance on different subsets. This approach tends to balance bias and variance by repeatedly testing the model on different parts of the data. The result showed an optimal \(\lambda\) of 0.01 with a corresponding training error (MSE) of 1.377282 and a test error of 1.554029. These errors indicate that the model performs well on both the training and test sets, demonstrating low variance and good generalization.
+The cross-validation process identifies the optimal $\lambda$ by splitting the dataset into 10 folds and measuring the model's performance on different subsets. This approach basically  tends to balance bias and variance by repeatedly testing the model on different parts of the data. The result showed an optimal $\lambda$ of 0.01 with a corresponding training error (MSE) of 1.377282 and a test error of 1.554029, indicating that the model performs well on both the training and test sets, demonstrating low variance and good generalization.
+
 ```{r}
 # Ridge regression (bootstrap)
 bootstrap_mse <- function(data, indices, lambda) {
@@ -349,7 +356,9 @@ bootstrap_results <- sapply(lambda_grid, function(lambda) {
 optimal_lambda_bootstrap <- lambda_grid[which.min(bootstrap_results)]
 cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 ```
-The bootstrap method resamples the dataset 100 times to evaluate the stability of the model and its performance under various random samples. The key advantage of this approach is that it generates different training datasets to capture variability. The bootstrap results across multiple \(\lambda\) values yielded an optimal \(\lambda\) of 0.1.
+
+The bootstrap method resamples the dataset 100 times to evaluate the stability of the model and its performance under various random samples. The key advantage of this approach is that it generates different training datasets to capture variability. The bootstrap results across multiple $\lambda$ values yielded an optimal $\lambda$ of 0.1.
+
 ```{r, echo=FALSE}
 results_df <- data.frame(
   Lambda = lambda_grid,
@@ -372,14 +381,14 @@ ggplot(results_df, aes(x = log10(Lambda)) ) +
         plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
-The results of the two methods are contrasted using a plot, where the MSE curves are plotted against \(\log_{10}(\lambda)\). Both curves exhibit a similar trend, showing a U-shape where error decreases initially with decreasing \(\lambda\) (left-hand side of the plot) before rising as \(\lambda\) increases.
 
-The optimal \(\lambda\) for cross-validation is slightly lower (\(\log_{10}(\lambda) = -2\)) compared to that of bootstrap (\(\log_{10}(\lambda) = -1\)). The Cross-Validation method may prefer a model with more regularization compared to Bootstrap, which tends to allow slightly more complexity (i.e., a higher \(\lambda\)). So in this case, Cross-Validation seems to provide a more stable and slightly better performance estimate, as shown by the lower MSE values.
+The results of the two methods are contrasted using a plot, where the MSE curves are plotted against $\log_{10}(\lambda)$. Both curves exhibit a similar trend, showing a U-shape where error decreases initially with decreasing $\lambda$ (left-hand side of the plot) before rising as $\lambda$ increases.
+
+The optimal $\lambda$ for cross-validation is slightly lower ($\log_{10}(\lambda) = -2$) compared to that of bootstrap ($\log_{10}(\lambda) = -1$). The Cross-Validation method may prefer a model with more regularization compared to Bootstrap, which tends to allow slightly more complexity (i.e., a higher $\lambda$). So in this case, Cross-Validation seems to provide a more stable and slightly better performance estimate, as shown by the lower MSE values.
 
 ## Non-linear Modeling Using Generalized Additive Models
 
-Generalized Additive Models (GAMs) offer a useful compromise between linear models and fully non-parametric models. They allow fitting a non-linear function \( f_j \) to each \( X_j \), enabling the automatic modeling of non-linear relationships that standard linear regression would not detect. Since the model is additive, we can still examine the effect of each \( X_j \) on \( Y \) individually, keeping all other variables fixed. The smoothness of the function \( f_j \) for the variable \( X_j \) can be summarized by the degrees of freedom. The main limitation of GAMs is that the model is constrained to be additive. With many variables, it is possible to miss important interactions. However, as with linear regression, we can manually add interaction terms to the GAM model by including additional predictors in the form of \( X_j \times X_k \). We can also add low-dimensional interaction functions in the form of \( f_{jk}(X_j, X_k) \) to the model. Such terms can be fitted using two-dimensional smoothers, such as local regression or two-dimensional splines.
-
+Generalized Additive Models (GAMs) offer a useful compromise between linear models and fully non-parametric models. They allow fitting a non-linear function $f_j$ to each $X_j$, enabling the automatic modeling of non-linear relationships that standard linear regression would not detect. Since the model is additive, we can still examine the effect of each $X_j$ on $Y$ individually, keeping all other variables fixed. The smoothness of the function $f_j$ for the variable $X_j$ can be summarized by the degrees of freedom. The main limitation of GAMs is that the model is constrained to be additive. With many variables, it is possible to miss important interactions. However, as with linear regression, we can manually add interaction terms to the GAM model by including additional predictors in the form of $X_j \times X_k$. We can also add low-dimensional interaction functions in the form of $f_{jk}(X_j, X_k)$ to the model. Such terms can be fitted using two-dimensional smoothers, such as local regression or two-dimensional splines.
 
 ```{r}
 sapply(trainData, function(x) length(unique(x)))
@@ -432,13 +441,14 @@ cat(paste(
   "Training Error (GAM - k=6):","\t",mse_train_gam_2, "\n",
   "Test Error (GAM - k=6):","\t",mse_test_gam_2, "\n"))
 ```
-The first model (`gam_model_1`) is specified with \( k = 1 \), indicating a lower complexity where each smooth term is linear. The second model (`gam_model_2`) is specified with \( k = 6 \) (higher value for the model due to unique values for each variable), allowing for more flexibility and complexity in the smooth terms.
+
+The first model (`gam_model_1`) is specified with $k = 1$, indicating a lower complexity where each smooth term is linear. The second model (`gam_model_2`) is specified with $k = 6$ (higher value for the model due to unique values for each variable), allowing for more flexibility and complexity in the smooth terms.
 
 gam_model_2 has a lower training error, its increased complexity results in higher test error compared to gam_model_1. Therefore, despite gam_model_1's higher test error, it may be preferable due to its generalization capability.
 
 ## Regression Tree Model with Cost-Complexity Pruning
 
-Now, we utilize a regression tree model to predict the response variable based. For regression tasks, the ANOVA split is employed, where splits are made to minimize the variance within nodes, effectively partitioning the data into homogeneous subsets. Regression trees operate by recursively splitting the data along the most significant feature at each node, creating a model that makes piecewise constant predictions for the response variable. While decision trees are highly flexible and can capture complex interactions in the data, they are prone to overfitting, particularly when the tree grows too deep. To mitigate this, pruning or controlling the complexity of the tree with a complexity parameter (CP) is often applied, which helps prevent overfitting by stopping splits that provide minimal improvement. Here, we implement a regression tree using the rpart library and assess the model’s performance by comparing the Mean Squared Error (MSE) on both training and test datasets.
+Now, we use a regression tree model to predict the response variable based. For regression tasks, the ANOVA split is employed, where splits are made to minimize the variance within nodes, effectively partitioning the data into homogeneous subsets. Regression trees operate by recursively splitting the data along the most significant feature at each node, creating a model that makes piecewise constant predictions for the response variable. While decision trees are highly flexible and can capture complex interactions in the data, they are prone to overfitting, particularly when the tree grows too deep. To mitigate this, pruning or controlling the complexity of the tree with a complexity parameter (CP) is often applied, which helps prevent overfitting by stopping splits that provide minimal improvement. Here, we implement a regression tree using the `rpart` library and assess the model’s performance by comparing the Mean Squared Error (MSE) on both training and test datasets.
 
 ```{r, echo=FALSE}
 library(rpart)
@@ -452,7 +462,9 @@ test_predictions_tree1 <- predict(tree_model, newdata = testData)
 mse_train_tree1 <- mean((trainData$LC50 - train_predictions_tree1)^2)
 mse_test_tree1 <- mean((testData$LC50 - test_predictions_tree1)^2)
 ```
-The complexity parameter (CP) table presented in the output illustrates the impact of increasing tree complexity by adding splits. The root node error serves as the baseline error when no splits are made. As splits are introduced, the relative error decreases, with the corresponding cross-validated error (xerror) reflecting how well the model is expected to generalize to unseen data.
+
+The complexity parameter `(CP)` table presented in the output illustrates the impact of increasing tree complexity by adding splits. The root node error serves as the baseline error when no splits are made. As splits are introduced, the relative error decreases, with the corresponding cross-validated error (`xerror`) reflecting how well the model is expected to generalize to unseen data.
+
 ```{r}
 printcp(tree_model)
 ```
@@ -462,8 +474,9 @@ cat(paste(
   "Training Error (Tree):","\t", mse_train_tree1, "\n",
   "Test Error (Tree):","\t", mse_test_tree1, "\n"))
 ```
-The decision tree model achieved a training error of 1.0075 and a test error of 2.0532, indicating that while the model fits the training data relatively well, it exhibits poor generalization on the test data. This could be due to potential overfitting, where the model captures noise or spurious relationships within the training data that do not generalize well to new data.
-In comparison to previously explored models, such as the Generalized Additive Model (GAM) with k=1, which demonstrated better test error performance, the decision tree's higher test error means that further tuning, such as pruning or adjusting the complexity parameter, may be necessary to improve its predictive performance on unseen data.
+
+The decision tree model achieved a training error of 1.0075 and a test error of 2.0532, indicating that while the model fits the training data relatively well, it exhibits poor generalization on the test data. This could be due to potential overfitting, where the model captures noise or spurious relationships within the training data that do not generalize well to new data. In comparison to previously explored models, such as the Generalized Additive Model (GAM) with k=1, which demonstrated better test error performance, the decision tree's higher test error means that further tuning, such as pruning or adjusting the complexity parameter, may be necessary to improve its predictive performance on unseen data.
+
 ```{r, echo=FALSE}
 rpart.plot(tree_model, 
            main = "Regression Tree (LC50)",
@@ -476,7 +489,9 @@ rpart.plot(tree_model,
            split.lty = 3,
 )
 ```
+
 In this updated approach, we prune the previously trained decision tree to enhance its generalization by reducing model complexity.The optimal complexity parameter (CP) is selected from the tree's complexity table based on the lowest cross-validated error (xerror), ensuring an appropriate balance between model complexity and prediction accuracy. Using this optimal CP value, we apply the prune function to simplify the tree by reducing the number of splits. The results show a training error of 1.2839 and a test error of 2.0162, compared to the unpruned tree’s training error of 1.0075 and test error of 2.0532. As expected, the training error increased after pruning because the model is now less complex and less tailored to the training data. However, the test error has decreased slightly, indicating a small improvement in the model’s ability to generalize to new data. While the improvement in test error is small, this process is crucial for producing a model that generalizes better without losing too much predictive power. In comparison to the unpruned tree, the pruned version provides a more balanced model by maintaining reasonable predictive performance while preventing overfitting, making it a valuable step in building robust machine learning models.
+
 ```{r, echo=FALSE}
 optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
 
@@ -512,7 +527,7 @@ rpart.plot(pruned_tree,
 
 ## Comparative Analysis of Regression Models
 
-In the final part of our first chapter, we compared the performance of all models we studied. The Mean Squared Error (MSE) for both training and test datasets was calculated for each model, and the results were plotted in the graph above. The plot clearly shows the trade-off between model complexity and generalization. Models like GAM and Linear Regression exhibit a balance between training and test error, whereas the Decision Tree shows a significant increase in test error, indicating overfitting despite its lower training error. Ridge Regression, on the other hand, strikes a balance with relatively low test error compared to other models, suggesting that regularization helped in avoiding overfitting while maintaining good performance.
+In the final part of this first chapter, we compared the performance of all models we studied. The Mean Squared Error (MSE) for both training and test datasets was calculated for each model, and the results were plotted in the graph above. The plot clearly shows the trade-off between model complexity and generalization. Models like GAM and Linear Regression exhibit a balance between training and test error, whereas the Decision Tree shows a significant increase in test error, indicating overfitting despite its lower training error. Ridge Regression, on the other hand, strikes a balance with relatively low test error compared to other models, suggesting that regularization helped in avoiding overfitting while maintaining good performance.
 
 ```{r, echo=FALSE}
 library(tidyr)
@@ -560,6 +575,7 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE,
         plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
+
 ```{r, echo=FALSE}
 ggplot(model_comparison_long, aes(x = Model, y = MSE, 
                                   color = Error_Type, group = Error_Type)) +
@@ -582,11 +598,12 @@ ggplot(model_comparison_long, aes(x = Model, y = MSE,
         text = element_text(size = 10)) +
   ylim(min(model_comparison_long$MSE) - 0.1, max(model_comparison_long$MSE) + 0.1)
 ```
+
 From this comparison, we can conclude that Ridge Regression offers the best overall performance in terms of balancing training and test errors. The Decision Tree, while effective in minimizing training error, suffers from poor generalization on unseen data, as reflected by the highest test error.
 
 # Classification Model Comparison for Diabetes Prediction
 
-Now in this second chapter, we use the Pima Indians Diabetes Database, a widely recognized dataset for testing and evaluating classification models. The dataset contains information on 768 women from the Pima Indian population, a group known to have a high predisposition to diabetes. The primary goal is to predict whether a woman has developed diabetes based on a set of eight numeric features. The response variable, diabetes, is binary, indicating the presence (pos) or absence (neg) of the disease. The features include medical and physiological factors such as the number of pregnancies (pregnant), plasma glucose concentration (glucose), diastolic blood pressure (pressure), triceps skin fold thickness (triceps), 2-hour serum insulin levels (insulin), body mass index (mass), diabetes pedigree function (pedigree), and age (age).
+Now in this second chapter, we use the Pima Indians Diabetes Database, a widely recognized dataset for testing and evaluating classification models. The dataset contains information on 768 women from the Pima Indian population, a group known to have a high predisposition to diabetes. The primary goal is to predict whether a woman has developed diabetes based on a set of eight numeric features. The response variable, diabetes, is binary, indicating the presence (`pos`) or absence (`neg`) of the disease. The features include medical and physiological factors such as the number of pregnancies (`pregnant`), plasma glucose concentration (`glucose`), diastolic blood pressure (`pressure`), triceps skin fold thickness (`triceps`), 2-hour serum insulin levels (`insulin`), body mass index (`mass`), diabetes pedigree function (`pedigree`), and `age`.
 
 ```{r, echo=FALSE}
 library(mlbench)
@@ -602,6 +619,7 @@ summary(df)
 ```{r}
 print(na_count)
 ```
+
 The first thing that we do is look at the NA's values. We address this problem by employing a k-Nearest Neighbors (kNN) imputation method. Missing data can lead to biased model results and reduced predictive performance, so handling these gaps appropriately is crucial. We observe that several features, such as glucose, pressure, triceps, insulin, and mass, contain missing values, as indicated by the na_count summary. The kNN imputation approach is implemented to estimate and fill these missing values.
 
 ```{r}
@@ -615,9 +633,11 @@ df_imp$diabetes <- as.factor(df_imp$diabetes)
 na_count_df_imp <- sapply(df_imp, function(x) sum(is.na(x)))
 print(na_count_df_imp)
 ```
-kNN imputation is a popular non-parametric method for handling missing data. The idea behind kNN imputation is to use the nearest data points to estimate missing values by leveraging the similarity between observations in the dataset. The underlying assumption is that similar instances will have similar values for the missing features. In a typical kNN algorithm, the distance between data points is calculated based on the non-missing features. Once the k-nearest neighbors (with the closest distance) to a given data point are identified, the missing values are imputed based on some aggregation (e.g., mean, median, or mode) of the nearest neighbors' corresponding values.
+
+`kNN imputation` is a popular non-parametric method for handling missing data. The idea behind this method is to use the nearest data points to estimate missing values by leveraging the similarity between observations in the dataset. The underlying assumption is that similar instances will have similar values for the missing features. In a typical kNN algorithm, the distance between data points is calculated based on the non-missing features. Once the k-nearest neighbors (with the closest distance) to a given data point are identified, the missing values are imputed based on some aggregation (e.g., mean, median, or mode) of the nearest neighbors' corresponding values.
 
 ## k-NN Classification and Cross-Validation Comparison
+
 ```{r, echo=FALSE}
 library(caret)
 set.seed(2024)
@@ -635,7 +655,7 @@ trainData$diabetes <- as.factor(trainData$diabetes)
 testData$diabetes <- as.factor(testData$diabetes)
 ```
 
-To evaluate the performance of the k-Nearest Neighbors (k-NN) classifier on the diabetes dataset, we conducted a systematic investigation into the optimal number of neighbors, k, by employing both 5-fold cross-validation and leave-one-out cross-validation (LOOCV). The analysis involved calculating the error rates across a range of k values (from 1 to 25), allowing us to assess how the choice of k influences model accuracy.
+To evaluate the performance of the k-Nearest Neighbors (k-NN) classifier on the diabetes dataset, we conducted a systematic investigation into the optimal number of neighbors, k, by employing both 5-fold cross-validation and leave-one-out cross-validation (`LOOCV`). The analysis involved calculating the error rates across a range of k values (from 1 to 25), allowing us to assess how the choice of k influences model accuracy.
 
 ```{r, echo=FALSE}
 library(class)
@@ -690,6 +710,7 @@ cat(paste("Optimal k from 5-fold CV:", optimal_k_5fold, "\n",
           "Optimal k from LOOCV:", optimal_k_loocv, "\n",
           "Optimal k from Test Errors:", optimal_k_test, "\n"))
 ```
+
 The optimal k determined through 5-fold cross-validation was 6, while both leave-one-out cross-validation (LOOCV) and test errors indicated an optimal k of 3. These findings suggest that while a slightly larger neighborhood can enhance accuracy in cross-validation settings, the model may perform best with a smaller k when generalizing to unseen data. This discrepancy underscores the inherent trade-offs between bias and variance in model selection, as a lower k can lead to greater sensitivity to noise in the training data, potentially improving predictive performance on test datasets.
 
 ```{r, echo=FALSE}
@@ -719,7 +740,9 @@ ggplot(error_data_long, aes(x = k, y = value, color = variable)) +
           plot.title = element_text(hjust = 0.5),
           text = element_text(size = 10))
 ```
-The blue test error line shows noticeable variability across different kk values, indicating that the model's ability to generalize decreases as k increases. Both LOOCV and 5-fold cross-validation errors remain relatively stable. These cross-validation methods offer consistent error estimates regardless of small changes in k. The optimal k for the test error seems to be around k=3, where the test error reaches its minimum, and both cross-validation errors align closely, validating this selection.
+
+The blue test error line shows noticeable variability across different k values, indicating that the model's ability to generalize decreases as k increases. Both LOOCV and 5-fold cross-validation errors remain relatively stable. These cross-validation methods offer consistent error estimates regardless of small changes in k. The optimal k for the test error seems to be around k=3, where the test error reaches its minimum, and both cross-validation errors align closely, validating this selection.
+
 ```{r}
 k_value <- 3
 predictions <- knn(train = trainData[,-ncol(trainData)], 
@@ -732,10 +755,49 @@ accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
 print(confusion_matrix)
 ```
 
+```{r, echo=FALSE, results='hide'}
+library(class)
+
+# Define k-value
+k_value <- 3
+
+# Predictions on test set
+predictions_test_knn <- knn(train = trainData[,-ncol(trainData)], 
+                        test = testData[,-ncol(testData)],
+                        cl = trainData$diabetes, 
+                        k = k_value)
+
+# Predictions on training set
+predictions_train_knn <- knn(train = trainData[,-ncol(trainData)], 
+                         test = trainData[,-ncol(trainData)],
+                         cl = trainData$diabetes, 
+                         k = k_value)
+
+# Confusion matrix and accuracy for test set
+confusion_matrix_test <- table(testData$diabetes, predictions_test_knn)
+accuracy_test <- sum(diag(confusion_matrix_test)) / sum(confusion_matrix_test)
+test_error_knn <- 1 - accuracy_test
+
+# Confusion matrix and accuracy for training set
+confusion_matrix_train <- table(trainData$diabetes, predictions_train_knn)
+accuracy_train <- sum(diag(confusion_matrix_train)) / sum(confusion_matrix_train)
+train_error_knn <- 1 - accuracy_train
+
+# Print results
+cat("Confusion Matrix (Test):\n")
+print(confusion_matrix_test)
+cat("Test Error Rate:", test_error_knn, "\n")
+
+cat("Confusion Matrix (Train):\n")
+print(confusion_matrix_train)
+cat("Train Error Rate:", train_error_knn, "\n")
+```
+
 ```{r}
 cat("Accuracy of k-NN with k =", k_value, ":", accuracy, "\n")
 ```
-The confusion matrix for k=3 shows that the model correctly classified 129 negative cases and 63 positive cases, but misclassified 25 positive cases as negative and 36 negative cases as positive. This leads to an overall accuracy of 75.89%.
+
+The confusion matrix for `k=3` shows that the model correctly classified 129 negative cases and 63 positive cases, but misclassified 25 positive cases as negative and 36 negative cases as positive. This leads to an overall accuracy of 75.89%.
 
 ## Generalized Additive Model for Diabetes Prediction
 
@@ -769,6 +831,7 @@ summary(gam_model)
 ```{r}
 print(conf_matrix)
 ```
+
 To find the best model, we can gradually remove less significant predictors based on their p-values from the summary of the GAM. This process reduces the model complexity while retaining important variables. The second GAM model removes less significant predictors `pregnant, pressure, triceps` and keeps the most relevant ones `glucose, insulin, mass, pedigree, age`, based on their smooth term significance.
 
 ```{r, echo=FALSE}
@@ -783,6 +846,31 @@ pred_class <- ifelse(pred_probs > 0.5, "pos", "neg") # Threshold at 0.5
 conf_matrix <- confusionMatrix(as.factor(pred_class), testData$diabetes, positive = "pos")
 ```
 
+```{r, echo=FALSE, results='hide'}
+
+# Make predictions on the test set
+pred_probs_test <- predict(gam_model2, newdata = testData, type = "response")
+pred_class_test <- ifelse(pred_probs_test > 0.5, "pos", "neg") # Threshold at 0.5
+
+# Confusion matrix and test error
+conf_matrix_test <- confusionMatrix(as.factor(pred_class_test), testData$diabetes, positive = "pos")
+accuracy_test <- conf_matrix_test$overall["Accuracy"]
+test_error_GAM <- 1 - accuracy_test
+
+# Make predictions on the training set
+pred_probs_train_GAM <- predict(gam_model2, newdata = trainData, type = "response")
+pred_class_train_GAM <- ifelse(pred_probs_train_GAM > 0.5, "pos", "neg")
+
+# Confusion matrix and train error
+conf_matrix_train <- confusionMatrix(as.factor(pred_class_train_GAM), trainData$diabetes, positive = "pos")
+accuracy_train <- conf_matrix_train$overall["Accuracy"]
+train_error_GAM <- 1 - accuracy_train
+
+# Print results
+cat("Test Error Rate:", test_error_GAM, "\n")
+cat("Train Error Rate:", train_error_GAM, "\n")
+```
+
 ```{r}
 summary(gam_model2)
 ```
@@ -790,13 +878,14 @@ summary(gam_model2)
 ```{r}
 print(conf_matrix)
 ```
+
 The full model achieved an accuracy of 78.66%, with a sensitivity of 72.73% and a specificity of 81.82%. It correctly classified 135 non-diabetic cases and 63 diabetic cases, but misclassified 24 diabetic individuals as negative and 30 non-diabetic individuals as positive. The reduced model, which included only a subset of the original predictors, showed a slightly improved performance. It achieved an accuracy of 79.45%, with a sensitivity of 75.00% and a specificity of 81.82%. This model reduced the false negatives from 24 to 22, meaning it more effectively identified positive diabetes cases, while maintaining the same number of false positives (30).
 
 ## Tree-Based Methods for Diabetes Classification
 
-Now in this section, we fit three tree-based models: a classification tree, an ensemble of bagged trees and a random forest. The performance of these models is evaluated by comparing the training and test error rates.
+In this section, we fit three tree-based models: a classification tree, an ensemble of bagged trees and a random forest. The performance of these models is evaluated by comparing the training and test error rates.
 
-The classification tree model, which is a single decision tree, had a training error of 0.136 and a test error of 0.217. This result highlights that the model may have slightly overfitted the training data, as it performed better on the training set compared to the test set. The relatively higher test error means that the classification tree is more prone to overfitting compared to ensemble methods.
+The classification tree, had a training error of 0.136 and a test error of 0.217. This result highlights that the model may have slightly overfitted the training data, as it performed better on the training set compared to the test set. The relatively higher test error means that the classification tree is more prone to overfitting compared to ensemble methods.
 
 ```{r Classification Tree, echo=FALSE}
 library(rpart)
@@ -819,7 +908,8 @@ cat(paste(
   "Classification Tree Training Error:", tree_train_error,"\n",
   "Classification Tree Test Error:", tree_test_error,"\n"))
 ```
-The bagged trees model, which is an ensemble of multiple trees created by bootstrapping, exhibited an exceptionally low training error of 0.002, the model perfectly fit the training data. However, the test error was 0.237, showing a significant increase from the training error. This sharp contrast between training and test errors indicates that the bagged model might be overfitting, as it achieves almost perfect performance on the training data but struggles to generalize to unseen data.
+
+The bagged trees, which is an ensemble of multiple trees created by bootstrapping, exhibited an exceptionally low training error of 0.002, the model perfectly fit the training data. However, the test error was 0.237, showing a significant increase from the training error. This sharp contrast between training and test errors indicates that the bagged model might be overfitting, as it achieves almost perfect performance on the training data but struggles to generalize to unseen data.
 
 ```{r Ensemble of Bagged Tree, echo=FALSE}
 set.seed(2024)
@@ -838,7 +928,8 @@ cat(paste(
   "Bagged Trees Training Error:", bagged_train_error, "\n",
   "Bagged Trees Test Error:", bagged_test_error, "\n"))
 ```
-The random forest model, which is another ensemble method but adds randomness by selecting a subset of features at each split, had a training error of 0—again indicating perfect fit on the training data. The test error for the random forest model was 0.217, identical to that of the classification tree. Despite the zero training error, the random forest did not show a marked improvement in the test error, suggesting that while it captures patterns in the training data well, it may still struggle with generalization.
+
+The random forest, another ensemble method but adds randomness by selecting a subset of features at each split, had a training error of 0 indicating perfect fit on the training data. The test error for the random forest model was 0.217, identical to that of the classification tree. Despite the zero training error, the random forest did not show a marked improvement in the test error, suggesting that while it captures patterns in the training data well, it may still struggle with generalization.
 
 ```{r Random Forest, echo=FALSE}
 # Fit the random forest
@@ -859,17 +950,18 @@ cat(paste(
   "Random Forest Training Error:", rf_train_error, "\n",
   "Random Forest Test Error:", rf_test_error, "\n"))
 ```
+
 ```{r}
 rf_test_confusion <- table(Predicted = rf_test_pred, Actual = testData$diabetes)
 
 cat("\nTest Confusion Matrix:\n")
 print(rf_test_confusion)
 ```
+
 ```{r}
 cat(paste("Training Error:", rf_train_error, "\n",
           "Test Error:", rf_test_error, "\n"))
 ```
-
 
 ```{r Plot Comparison, echo=FALSE}
 # Store the errors in a data frame
@@ -899,11 +991,12 @@ ggplot(results_long, aes(x = Model, y = Error, fill = Error_Type)) +
         axis.title = element_text(),
         text = element_text(size = 10))
 ```
+
 The classification tree and random forest had the same test error of 0.217, while the bagged trees model showed the highest test error at 0.237. Both ensemble methods (bagged trees and random forest) achieved perfect or near-perfect performance on the training data, but their test error rates did not outperform the simpler classification tree. This suggests that although the ensemble methods reduce variance by averaging multiple trees, they do not necessarily improve generalization on this specific dataset.
 
 ## Neural Network Modeling for Diabetes Prediction
 
-Now as last model we look at Neural Networks. Here we perform a neural network where the number of neurons in the hidden layer is varied to study its effect on both training and test error rates. The sequence of neurons ranges from 1 to 100, and for each neuron count, a neural network is trained on scaled training data (trainData_scaled). The model is fitted with a maximum of 500 iterations, using logistic activation since it is a classification task. For each configuration, predictions are made on both the training and test sets, and classification errors are calculated. Once all models are trained, the optimal number of neurons is identified by selecting the configuration that minimizes the test error.
+Now, as last model, we look at Neural Networks. Here we perform a neural network where the number of neurons in the hidden layer is varied to study its effect on both training and test error rates. The sequence of neurons ranges from 1 to 100, and for each neuron count, a neural network is trained on scaled training data (`trainData_scaled`). The model is fitted with a maximum of 500 iterations, using logistic activation since it is a classification task. For each configuration, predictions are made on both the training and test sets, and classification errors are calculated. Once all models are trained, the optimal number of neurons is identified by selecting the configuration that minimizes the test error.
 
 ```{r, echo=FALSE}
 set.seed(2024)
@@ -928,6 +1021,9 @@ testData_scaled <- predict(preProc, testData)
 ```
 
 ```{r}
+library(nnet)
+library(caret)
+
 set.seed(2024)
 neurons <- seq(1, 100, by = 5)
 train_errors <- c()
@@ -972,7 +1068,9 @@ print(error_results)
 optimal_neurons <- neurons[which.min(test_errors)]
 cat("Optimal number of neurons:", optimal_neurons, "\n")
 ```
-The graph illustrates the training and test error rates across different neuron configurations. The training error decreases quickly as the number of neurons increases, reaching zero around 25 neurons and staying flat at zero afterward. This indicates that the model is able to perfectly fit the training data beyond a certain complexity, a sign of potential overfitting. On the other hand, the test error initially decreases, suggesting that the model is generalizing well to the unseen data. However, after around 25 neurons, the test error begins to fluctuate and increase.
+
+The graph illustrates the training and test error rates across different neuron configurations. The training error decreases quickly as the number of neurons increases, reaching zero around 25 neurons and staying flat at zero afterward. The model is able to perfectly fit the training data beyond a certain complexity, a sign of potential overfitting. On the other hand, the test error initially decreases, suggesting that the model is generalizing well to the unseen data. However, after around 25 neurons, the test error begins to fluctuate and increase.
+
 ```{r, echo=FALSE}
 library(ggplot2)
 error_results_long <- reshape2::melt(error_results,
@@ -992,6 +1090,7 @@ ggplot(error_results_long, aes(x = Neurons, y = Error,
         plot.title = element_text(hjust = 0.5),
         text = element_text(size = 10))
 ```
+
 The behavior shown in the graph is a classic case of overfitting. The rapid decline in training error and the rising fluctuations in test error suggest that adding more neurons beyond a certain point results in a model that is too finely tuned to the training data, leading to poor generalization.
 
 ```{r, echo=FALSE}
@@ -1017,7 +1116,9 @@ test_pred_class <- ifelse(test_pred > 0.5, 1, 0)
 test_error <- mean(test_pred_class != as.numeric(as.character(testData_scaled$diabetes)))
 test_errors <- c(test_errors, test_error)
 ```
+
 The results from the confusion matrix, based on a model trained with 1 neuron, reveal that the model has a training error of 0.218 and a test error of 0.207. The confusion matrix shows a balanced accuracy of 0.7922 and a Kappa statistic of 0.5366 (moderate agreement between predicted and true labels). The model demonstrates high sensitivity (85.54%) but lower specificity (67.42%), basically it performs better at identifying non-diabetic cases than diabetic ones.
+
 ```{r}
 cat(paste("Training Error for 1 neurons:", train_error, "\n",
           "Test Error for 1 neurons:", test_error, "\n"))
@@ -1025,6 +1126,7 @@ cat(paste("Training Error for 1 neurons:", train_error, "\n",
 confusion <- confusionMatrix(as.factor(test_pred_class), testData$diabetes)
 print(confusion)
 ```
+
 This case serves as a practical demonstration of the Universal Approximation Theorem, which asserts that a neural network with a sufficient number of neurons can approximate any continuous function. As seen in the experiment, the training error rapidly decreases as the number of neurons increases, reaching zero around 25 neurons, indicating that the network is able to perfectly capture the patterns in the training data. This supports the theorem's claim that a neural network, with enough capacity, can approximate complex decision boundaries. However, as the number of neurons continues to increase beyond this point, the test error begins to fluctuate and rise, which suggests overfitting. While the Universal Approximation Theorem guarantees that a network can model any function, it does not guarantee generalization. In this case, the network starts fitting not only the true patterns but also the noise in the training data, leading to worse performance on unseen data. Interestingly, the model with just one neuron provides the best test error, showing that simpler models often generalize better, as they avoid the risk of overfitting that comes with more complex networks.
 
 ```{r, echo=FALSE, results='hide'}
@@ -1065,6 +1167,7 @@ error_results <- data.frame(
 )
 print(error_results)
 ```
+
 ```{r, echo=FALSE, results='hide'}
 # Choose the optimal number of neurons based on test error
 optimal_neurons <- neurons[which.min(test_errors)]
@@ -1093,15 +1196,21 @@ ggplot(error_results_long, aes(x = Neurons, y = Error,
 
 ## Comparing Classification Methods for Diabetes Analysis
 
+In this final section, we present a comparative analysis of the various classification models that we used for the problem of diabetes prediction, focusing on model performance in terms of training and test errors.
+
+The first graph displays the Mean Squared Error for training and test datasets across the six models: Bagged Trees, Classification Tree, Generalized Additive Model (GAM), k-Nearest Neighbors (k-NN) Classification, Neural Network, and Random Forest. A clear pattern emerges: Bagged Trees and Random Forest models achieve zero training error, indicating that these ensemble methods can perfectly fit the training data. However, the test errors for these models (0.24 and 0.22, respectively) are notably higher than their training counterparts, suggesting overfitting, where the model captures noise in the training data, which does not generalize well to new data. The GAM and k-NN models show a smaller gap between training and test errors, with the k-NN model, in particular, achieving the lowest test error (0.11), indicating it might be the most effective model in terms of generalization for this task. The Neural Network model also shows a discrepancy, with a higher test error (0.28) relative to its training error (0.1), hinting at potential overfitting.
+
 ```{r, echo=FALSE}
 library(tidyr)
 
 model_comparison <- data.frame(
   Model = c("k-NN Classification", "GAM", "Classification Tree", "Bagged Trees", "Random Forest", "Neural Network"),
-  Training_Error = c(error_train, error_train_dummy,
-                     mse_train_ridge, mse_train_gam_2, mse_train_tree),
-  Test_Error = c(error_test, error_test_dummy,
-                 mse_test_ridge, mse_test_gam_2, mse_test_tree)
+  Training_Error = c(train_error_knn, train_error_GAM,
+                     tree_train_error, 
+                     bagged_train_error, rf_train_error, train_error),
+  Test_Error = c(test_error_knn, test_error_GAM,
+                 tree_test_error, bagged_test_error, rf_test_error, 
+                 test_error)
 )
 
 model_comparison_long <- pivot_longer(model_comparison, 
@@ -1111,24 +1220,28 @@ model_comparison_long <- pivot_longer(model_comparison,
 ```
 
 ```{r, echo=FALSE}
-ggplot(model_comparison_long, aes(x = Model, y = MSE, 
-                                  color = Error_Type, group = Error_Type)) +
-  geom_line(size = 0.9) +
-  geom_point(size = 3, shape = 21, fill = "white") +
+library(ggplot2)
+ggplot(model_comparison_long, aes(x = Model, y = MSE, fill = Error_Type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
   geom_text(aes(label = round(MSE, 2)), 
-            position = position_dodge(width = 0.5), 
+            position = position_dodge(width = 0.7), 
             vjust = -0.5, size = 3) +
   labs(title = "Comparison of Training and Test Errors across Models",
        x = "Model",
        y = "Mean Squared Error (MSE)",
-       color = "Error Type") +
-  scale_color_brewer(palette = "Set1") +
+       fill = "Error Type") +
+  scale_fill_manual(values = c("#4E79A7", "#F28E2B")) + # Custom colors
   theme_light() +
-  theme(legend.position = "bottom",
-        panel.grid = element_blank(),
-        plot.title = element_text(hjust = 0.5, size = 12),
-        plot.subtitle = element_text(hjust = 0.5, size = 10),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        text = element_text(size = 10)) +
+  theme(
+    legend.position = "bottom",
+    panel.grid = element_blank(),
+    plot.title = element_text(hjust = 0.5, size = 12),
+    plot.subtitle = element_text(hjust = 0.5, size = 10),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    text = element_text(size = 10)
+  ) +
   ylim(min(model_comparison_long$MSE) - 0.1, max(model_comparison_long$MSE) + 0.1)
+
 ```
+
+In conclusion, the analysis of this data reveals that the k-NN model provides the best generalization, as evidenced by the lowest test error and highest test accuracy, suggesting it may be the most suitable model for this diabetes classification task. In contrast, Bagged Trees, Random Forest, and Neural Network, while highly accurate on training data, display significant drops in test performance, indicating overfitting and potential challenges in generalization. These findings align with the expectations for ensemble and neural network methods, where high model complexity can lead to perfect training results but poorer test performance if not carefully regularized.
