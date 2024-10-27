@@ -182,7 +182,7 @@ perform_analysis <- function(data) {
 }
 ```
 
-```{r, echo=FALSE, results='asis'}
+```{r, echo=TRUE, results='asis'}
 num_repeats <- 200
 results <- replicate(num_repeats, perform_analysis(data))
 
@@ -220,7 +220,7 @@ The graph presents a density plot comparing the test error distributions for the
 
 In this section we will look at model selection, which involves evaluating a trade-off between the goodness of fit of the model, which reflects the ability to fit the observed data, and the complexity of the model, which refers to the number of parameters used. To do this, various model selection criteria have been developed to guide the choice of parsimonious models that offer good generalization. Two of these widely used criteria are the Akaike Information Criterion (AIC) and the Bayesian Information Criterion (BIC). The AIC estimates the loss of information when a candidate model is used to represent the real data generation process, aiming to minimize this loss. On the other hand, the BIC is derived from a Bayesian perspective and approaches model selection as choosing the model with the highest posterior probability given the observed data. Both the AIC and BIC take into consideration the goodness of fit of the model and penalize model complexity, although the BIC imposes a stricter penalty for complexity, favoring simpler models than the AIC. The Forward Selection method starts with a model containing only one intercept and iteratively adds variables one at a time, selecting at each step the variable that leads to the maximum reduction in AIC or BIC. In contrast, the Backward method starts with a complete model and iteratively removes variables that contribute less significantly to the model, evaluated again by the AIC or BIC. Both the Stepwise and Backward methods provide systematic strategies for model selection, guided by the goal of finding a model that balances goodness of fit and complexity as quantified by the AIC or BIC.
 
-```{r Backward Elimination AIC BIC, echo=FALSE}
+```{r Backward Elimination AIC BIC, echo=TRUE}
 library(MASS)
 library(leaps)
 
@@ -241,7 +241,7 @@ summary(backward_aic)
 summary(backward_bic)
 ```
 
-```{r Forward Selection AIC BIC, echo=FALSE}
+```{r Forward Selection AIC BIC, echo=TRUE}
 # Forward Selection
 null_model <- lm(LC50 ~ 1, data = trainData)
 forward_aic <- stepAIC(null_model, direction = "forward",
@@ -359,7 +359,7 @@ cat("Optimal lambda from Bootstrap:", optimal_lambda_bootstrap, "\n")
 
 The bootstrap method resamples the dataset 100 times to evaluate the stability of the model and its performance under various random samples. The key advantage of this approach is that it generates different training datasets to capture variability. The bootstrap results across multiple $\lambda$ values yielded an optimal $\lambda$ of 0.1.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 results_df <- data.frame(
   Lambda = lambda_grid,
   CV_MSE = sapply(lambda_grid,
@@ -450,7 +450,7 @@ gam_model_2 has a lower training error, its increased complexity results in high
 
 Now, we use a regression tree model to predict the response variable based. For regression tasks, the ANOVA split is employed, where splits are made to minimize the variance within nodes, effectively partitioning the data into homogeneous subsets. Regression trees operate by recursively splitting the data along the most significant feature at each node, creating a model that makes piecewise constant predictions for the response variable. While decision trees are highly flexible and can capture complex interactions in the data, they are prone to overfitting, particularly when the tree grows too deep. To mitigate this, pruning or controlling the complexity of the tree with a complexity parameter (CP) is often applied, which helps prevent overfitting by stopping splits that provide minimal improvement. Here, we implement a regression tree using the `rpart` library and assess the model’s performance by comparing the Mean Squared Error (MSE) on both training and test datasets.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(rpart)
 library(rpart.plot)
 
@@ -492,7 +492,7 @@ rpart.plot(tree_model,
 
 In this updated approach, we prune the previously trained decision tree to enhance its generalization by reducing model complexity.The optimal complexity parameter (CP) is selected from the tree's complexity table based on the lowest cross-validated error (xerror), ensuring an appropriate balance between model complexity and prediction accuracy. Using this optimal CP value, we apply the prune function to simplify the tree by reducing the number of splits. The results show a training error of 1.2839 and a test error of 2.0162, compared to the unpruned tree’s training error of 1.0075 and test error of 2.0532. As expected, the training error increased after pruning because the model is now less complex and less tailored to the training data. However, the test error has decreased slightly, indicating a small improvement in the model’s ability to generalize to new data. While the improvement in test error is small, this process is crucial for producing a model that generalizes better without losing too much predictive power. In comparison to the unpruned tree, the pruned version provides a more balanced model by maintaining reasonable predictive performance while preventing overfitting, making it a valuable step in building robust machine learning models.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 optimal_cp <- tree_model$cptable[which.min(tree_model$cptable[,"xerror"]), "CP"]
 
 pruned_tree <- prune(tree_model, cp = optimal_cp)
@@ -638,7 +638,7 @@ print(na_count_df_imp)
 
 ## k-NN Classification and Cross-Validation Comparison
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(caret)
 set.seed(2024)
 trainIndex <- createDataPartition(df_imp$diabetes, 
@@ -657,10 +657,10 @@ testData$diabetes <- as.factor(testData$diabetes)
 
 To evaluate the performance of the k-Nearest Neighbors (k-NN) classifier on the diabetes dataset, we conducted a systematic investigation into the optimal number of neighbors, k, by employing both 5-fold cross-validation and leave-one-out cross-validation (`LOOCV`). The analysis involved calculating the error rates across a range of k values (from 1 to 25), allowing us to assess how the choice of k influences model accuracy.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(class)
 library(mlbench)
-# Function: cross-validated k-NN errors
+
 cv_knn_errors <- function(data, k_values, cv_type) {
     errors <- numeric(length(k_values))
     for (i in seq_along(k_values)) {
@@ -691,7 +691,7 @@ trainIndex <- createDataPartition(df_imp$diabetes, p = .67, list = FALSE)
 trainData <- df_imp[trainIndex, ]
 testData <- df_imp[-trainIndex, ]
 
-# Loop for each k
+# Loop for k
 test_errors <- numeric(length(k_values))
 for (i in seq_along(k_values)) {
     k <- k_values[i]
@@ -805,7 +805,7 @@ In this section, we look again at Generalized Additive Model (GAM) but now using
 
 We first fit a GAM using smooth functions `s()` on each predictor in the diabetes dataset. The response variable, diabetes, is binary, so we use the binomial family with the logit link function.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(caret)
 library(mgcv)
 library(dplyr)
@@ -834,7 +834,7 @@ print(conf_matrix)
 
 To find the best model, we can gradually remove less significant predictors based on their p-values from the summary of the GAM. This process reduces the model complexity while retaining important variables. The second GAM model removes less significant predictors `pregnant, pressure, triceps` and keeps the most relevant ones `glucose, insulin, mass, pedigree, age`, based on their smooth term significance.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 gam_model2 <- gam(diabetes ~ s(glucose) + s(insulin) + s(mass) + 
                  s(pedigree) + s(age), data = trainData, family = binomial)
 
@@ -887,7 +887,7 @@ In this section, we fit three tree-based models: a classification tree, an ensem
 
 The classification tree, had a training error of 0.136 and a test error of 0.217. This result highlights that the model may have slightly overfitted the training data, as it performed better on the training set compared to the test set. The relatively higher test error means that the classification tree is more prone to overfitting compared to ensemble methods.
 
-```{r Classification Tree, echo=FALSE}
+```{r Classification Tree, echo=TRUE}
 library(rpart)
 library(ipred)
 library(randomForest)
@@ -911,7 +911,7 @@ cat(paste(
 
 The bagged trees, which is an ensemble of multiple trees created by bootstrapping, exhibited an exceptionally low training error of 0.002, the model perfectly fit the training data. However, the test error was 0.237, showing a significant increase from the training error. This sharp contrast between training and test errors indicates that the bagged model might be overfitting, as it achieves almost perfect performance on the training data but struggles to generalize to unseen data.
 
-```{r Ensemble of Bagged Tree, echo=FALSE}
+```{r Ensemble of Bagged Tree, echo=TRUE}
 set.seed(2024)
 bagged_trees <- bagging(diabetes ~ ., data = trainData)
 
@@ -931,7 +931,7 @@ cat(paste(
 
 The random forest, another ensemble method but adds randomness by selecting a subset of features at each split, had a training error of 0 indicating perfect fit on the training data. The test error for the random forest model was 0.217, identical to that of the classification tree. Despite the zero training error, the random forest did not show a marked improvement in the test error, suggesting that while it captures patterns in the training data well, it may still struggle with generalization.
 
-```{r Random Forest, echo=FALSE}
+```{r Random Forest, echo=TRUE}
 # Fit the random forest
 set.seed(2024)
 random_forest <- randomForest(diabetes ~ ., data = trainData)
@@ -1071,7 +1071,7 @@ cat("Optimal number of neurons:", optimal_neurons, "\n")
 
 The graph illustrates the training and test error rates across different neuron configurations. The training error decreases quickly as the number of neurons increases, reaching zero around 25 neurons and staying flat at zero afterward. The model is able to perfectly fit the training data beyond a certain complexity, a sign of potential overfitting. On the other hand, the test error initially decreases, suggesting that the model is generalizing well to the unseen data. However, after around 25 neurons, the test error begins to fluctuate and increase.
 
-```{r, echo=FALSE}
+```{r, echo=TRUE}
 library(ggplot2)
 error_results_long <- reshape2::melt(error_results,
                                      id.vars = "Neurons", 
